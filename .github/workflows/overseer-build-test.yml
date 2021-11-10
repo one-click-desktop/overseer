@@ -18,6 +18,8 @@ jobs:
       # Tymczasowo dodanie lokalnych pakietow
       - name: Add local packages
         run: dotnet nuget add source ./Overseer/packages/
+      - name: Restore packages  
+        run: dotnet restore
       - name: Build Overseer
         run: dotnet build
       - name: Run unit tests for Overseer
