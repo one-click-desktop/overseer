@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 
 using OneClickDesktop.Api.Controllers;
+using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
@@ -10,6 +11,14 @@ namespace OneClickDesktop.Overseer.Controllers
     [ApiController]
     public class SessionController : SessionApiController
     {
+        private readonly ISessionService sessionService;
+
+        public SessionController(ISessionService sessionService)
+        {
+            this.sessionService = sessionService;
+        }
+
+
         public override IActionResult DeleteSession([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
             throw new NotImplementedException();

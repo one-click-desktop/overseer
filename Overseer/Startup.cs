@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using OneClickDesktop.Overseer.Services.Classes;
+using OneClickDesktop.Overseer.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +28,11 @@ namespace OneClickDesktop.Overseer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
+            services.AddScoped<ILoginService, LoginService>();
+            services.AddScoped<IResourcesService, ResourcesService>();
+            services.AddScoped<ISessionService, SessionService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

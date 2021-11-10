@@ -7,7 +7,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
     /// <summary>
     /// Service zarządzający sesjami uzytkowników w systemie.
     /// </summary>
-    interface ISessionService
+    public interface ISessionService
     {
         /// <summary>
         /// Metoda przekazuje do reszty systemu prośbe o utowrzenie sesji dla danego uzytkownika.

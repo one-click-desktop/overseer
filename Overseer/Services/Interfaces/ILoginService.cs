@@ -6,7 +6,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
     /// <summary>
     /// Service pilnujący logowania i autoryzacji
     /// </summary>
-    interface ILoginService
+    public interface ILoginService
     {
         /// <summary>
         /// Metoda sprawdza, czy dane logowania sa prawidłowe.
