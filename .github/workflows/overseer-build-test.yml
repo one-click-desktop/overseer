@@ -1,0 +1,21 @@
+name: Overseer Build&Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  overseer-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.x'
+      - name: Build Overseer
+        run: dotnet build
+      - name: Run unit tests for Overseer
+        run: dotnet test
