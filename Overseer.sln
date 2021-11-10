@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B9679823-4D6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{454C3DCB-2528-4968-9B9D-D0D6FC354057}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Classes.Tests", "Backend.Library.Tests\Backend.Classes.Tests.csproj", "{FCCA323B-1B5F-490C-A184-9E4D354DA61B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Classes.Tests", "Backend.Classes.Tests\Backend.Classes.Tests.csproj", "{FCCA323B-1B5F-490C-A184-9E4D354DA61B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
