@@ -1,0 +1,26 @@
+name: Overseer Build&Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  overseer-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.x'
+      # Tymczasowo dodanie lokalnych pakietow
+      - name: Add local packages
+        run: dotnet nuget add source /home/runner/work/overseer/overseer/Overseer/packages/
+      - name: Restore packages  
+        run: dotnet restore
+      - name: Build Overseer
+        run: dotnet build
+      - name: Run unit tests for Overseer
+        run: dotnet test
