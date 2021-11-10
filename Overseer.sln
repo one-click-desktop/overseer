@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31829.152
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overseer", "Overseer\Overseer.csproj", "{75A4E2D8-DF42-47C1-8326-B2A85A00DE1F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75A4E2D8-DF42-47C1-8326-B2A85A00DE1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75A4E2D8-DF42-47C1-8326-B2A85A00DE1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75A4E2D8-DF42-47C1-8326-B2A85A00DE1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75A4E2D8-DF42-47C1-8326-B2A85A00DE1F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1B44B13C-ABF3-4B16-973A-A560FD9E7CE4}
+	EndGlobalSection
+EndGlobal
