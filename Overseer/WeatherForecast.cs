@@ -1,6 +1,6 @@
 using System;
 
-namespace Overseer
+namespace OneClickDesktop.Overseer
 {
     public class WeatherForecast
     {

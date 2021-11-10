@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Overseer
+namespace OneClickDesktop.Overseer
 {
     public class Startup
     {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Overseer.Controllers
+namespace OneClickDesktop.Overseer.Controllers
 {
     [ApiController]
     [Route("[controller]")]
