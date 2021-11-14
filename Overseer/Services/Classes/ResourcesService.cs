@@ -8,7 +8,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class ResourcesService : IResourcesService
     {
-        private List<Machines> fakeMachines;
+        private List<Machine> fakeMachines;
         public ResourcesService()
         {
             fakeMachines = new List<Machines>();

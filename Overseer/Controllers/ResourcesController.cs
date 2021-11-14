@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 using OneClickDesktop.Api.Controllers;
-using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Authorization;
+using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Controllers
@@ -22,7 +22,7 @@ namespace OneClickDesktop.Overseer.Controllers
         [Authorize(Role.Admin)]
         public override IActionResult GetResources()
         {
-            return Ok();
+            throw new System.NotImplementedException();
         }
     }
 }

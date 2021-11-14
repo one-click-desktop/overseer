@@ -12,7 +12,7 @@ namespace OneClickDesktop.Overseer.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class MachinesController : ControllerBase// : MachinesApiController
+    public class MachinesController : MachinesApiController
     {
         private readonly IResourcesService resourcesService;
 
@@ -21,10 +21,7 @@ namespace OneClickDesktop.Overseer.Controllers
             this.resourcesService = machinesService;
         }
 
-        [Authorize(Role.User, Role.Admin)]
-        [HttpGet]
-        [Route("machines")]
-        public IActionResult GetMachines()
+        public override IActionResult GetMachines()
         {
             var machines = resourcesService.GetMachinesInfo();
             return Ok(machines);
