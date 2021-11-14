@@ -12,6 +12,7 @@ using OneClickDesktop.Backend.Classes;
 using OneClickDesktop.Overseer.Authorization;
 using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Helpers;
+using OneClickDesktop.Overseer.Helpers.Exceptions;
 using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
@@ -22,9 +23,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private IJwtUtils jwtUtils;
         private readonly JwtSettings jwtSettings;
 
-        //Fake UserData
-        private Dictionary<string, User> fakeUsers;
-
         public UserService(DataContext context,
             IJwtUtils jwtUtils,
             IOptions<JwtSettings> jwtSettings)
@@ -32,12 +30,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
             this.jwtSettings = jwtSettings.Value;
             this.jwtUtils = jwtUtils;
             this.context = context;
-
-            fakeUsers = new Dictionary<string, User>();
-
-            fakeUsers.Add("user1", new User() { Id = 1, Username = "user1", Password = "user1_pass", Role = Role.User });
-            fakeUsers.Add("user2", new User() { Id = 1, Username = "user2", Password = "user2_pass", Role = Role.User });
-            fakeUsers.Add("admin1", new User() { Id = 1, Username = "admin1", Password = "admin1_pass", Role = Role.Admin });
         }
 
         public Token Login(Login loginData)
@@ -46,7 +38,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
             // validate
             if (user == null || loginData.Password != user.Password)
-                throw new AppException("Bad credentials");
+                throw new ErrorHttpException("Bad credentials", HttpStatusCode.Unauthorized);
 
             // authentication successful so generate jwt token
             var jwtToken = jwtUtils.GenerateJwtToken(user);

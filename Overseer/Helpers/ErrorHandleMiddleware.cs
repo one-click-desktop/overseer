@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using OneClickDesktop.Overseer.Helpers.Exceptions;
+using OneClickDesktop.Api.Models;
 
 namespace OneClickDesktop.Overseer.Helpers
 {
@@ -27,19 +29,20 @@ namespace OneClickDesktop.Overseer.Helpers
                 var response = context.Response;
                 response.ContentType = "application/json";
 
+                Error res = new Error();
+                res.Message = error.Message;
                 switch (error)
                 {
                     case AppException e:
                         // custom application error
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        res.Code = (int)HttpStatusCode.BadRequest;
                         break;
-                    case KeyNotFoundException e:
-                        // not found error
-                        response.StatusCode = (int)HttpStatusCode.NotFound;
+                    case HttpException e:
+                        res.Code = e.ErrorCode;
                         break;
                     default:
                         // unhandled error
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        res.Code = (int)HttpStatusCode.InternalServerError;
                         break;
                 }
 

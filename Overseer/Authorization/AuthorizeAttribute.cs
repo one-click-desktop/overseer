@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.Overseer.Entities;
+using OneClickDesktop.Overseer.Helpers.Exceptions;
 
 namespace OneClickDesktop.Overseer.Authorization
 {
@@ -31,7 +32,7 @@ namespace OneClickDesktop.Overseer.Authorization
             if (user == null || (_roles.Any() && !_roles.Contains(user.Role)))
             {
                 // not logged in or role not authorized
-                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                throw new UnathorizedHttpException();
             }
         }
     }

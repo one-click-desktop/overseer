@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OneClickDesktop.Backend.Classes
+namespace OneClickDesktop.Overseer.Helpers.Exceptions
 {
     public class HttpException: Exception
     {

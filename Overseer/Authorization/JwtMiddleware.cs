@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using OneClickDesktop.Overseer.Helpers;
+using OneClickDesktop.Overseer.Helpers.Exceptions;
 using OneClickDesktop.Overseer.Services.Interfaces;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,13 +25,20 @@ namespace OneClickDesktop.Overseer.Authorization
 
         public async Task Invoke(HttpContext context, IUserService userService, IJwtUtils jwtUtils)
         {
-            var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var userId = jwtUtils.ValidateJwtToken(token);
-            if (userId != null)
+            try
             {
-                // attach user to context on successful jwt validation
-                context.Items["User"] = userService.GetUserById(userId.Value);
+                var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                var userId = jwtUtils.ValidateJwtToken(token);
+                if (userId != null)
+                {
+                    // attach user to context on successful jwt validation
+                    context.Items["User"] = userService.GetUserById(userId.Value);
+                }
             }
+            catch (KeyNotFoundException)
+            {
+                throw new UnathorizedHttpException();
+            }   
 
             await _next(context);
         }
