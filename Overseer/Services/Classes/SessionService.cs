@@ -10,12 +10,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class SessionService : ISessionService
     {
-        private Dictionary<string, (Session ses, string user)> fakeSessionList;
-
-        public SessionService()
-        {
-            fakeSessionList = new Dictionary<string, (Session ses, string user)>();
-        }
+        private static Dictionary<string, (Session ses, string user)> fakeSessionList = new Dictionary<string, (Session ses, string user)>();
 
         private Session FindSession(string sessionGuid, string userGuid)
         {

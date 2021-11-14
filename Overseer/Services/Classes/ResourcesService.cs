@@ -16,12 +16,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
             fakeMachines = new List<Machine>();
             fakeMachines.Add(new Machine()
             {
-                Amount = 3,
+                Amount = 2,
                 Type = MachineType.CpuEnum
             });
             fakeMachines.Add(new Machine()
             {
-                Amount = 1,
+                Amount = 0,
                 Type = MachineType.GpuEnum
             });
 

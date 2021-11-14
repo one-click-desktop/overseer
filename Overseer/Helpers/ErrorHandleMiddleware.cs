@@ -42,7 +42,7 @@ namespace OneClickDesktop.Overseer.Helpers
                         break;
                 }
 
-                var result = JsonSerializer.Serialize(new { message = error?.Message });
+                var result = JsonSerializer.Serialize(res);
                 await response.WriteAsync(result);
             }
         }

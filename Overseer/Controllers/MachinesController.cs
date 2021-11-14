@@ -21,6 +21,7 @@ namespace OneClickDesktop.Overseer.Controllers
             this.resourcesService = machinesService;
         }
 
+        [Authorize]
         public override IActionResult GetMachines()
         {
             var machines = resourcesService.GetMachinesInfo();

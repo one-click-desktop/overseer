@@ -29,11 +29,12 @@ namespace OneClickDesktop.Overseer.Authorization
 
             // authorization
             var user = (User)context.HttpContext.Items["User"];
-            if (user == null || (_roles.Any() && !_roles.Contains(user.Role)))
-            {
-                // not logged in or role not authorized
+
+            if (user == null)
                 throw new UnathorizedHttpException();
-            }
+
+            if (_roles.Any() && !_roles.Contains(user.Role))
+                throw new UnathorizedHttpException();
         }
     }
 }
