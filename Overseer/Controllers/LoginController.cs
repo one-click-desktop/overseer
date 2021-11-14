@@ -20,7 +20,9 @@ namespace OneClickDesktop.Overseer.Controllers
 
         public override IActionResult Login([FromBody] Login login)
         {
-            throw new NotImplementedException();
+            Token token = loginService.Login(login);
+
+            return Ok(token);
         }
     }
 }

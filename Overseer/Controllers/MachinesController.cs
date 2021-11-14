@@ -3,6 +3,8 @@ using System;
 
 using OneClickDesktop.Api.Controllers;
 using OneClickDesktop.Overseer.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using OneClickDesktop.Overseer.Helpers;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
@@ -17,9 +19,11 @@ namespace OneClickDesktop.Overseer.Controllers
             this.resourcesService = machinesService;
         }
 
+        [Authorize(Roles = Role.User)]
         public override IActionResult GetMachines()
         {
-            throw new NotImplementedException();
+            var machines = resourcesService.GetMachinesInfo();
+            return Ok(machines);
         }
     }
 }

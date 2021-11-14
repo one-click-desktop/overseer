@@ -8,6 +8,22 @@ namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class ResourcesService : IResourcesService
     {
+        private List<Machines> fakeMachines;
+        public ResourcesService()
+        {
+            fakeMachines = new List<Machines>();
+            fakeMachines.Add(new Machines()
+            {
+                Amount = 3,
+                Type = MachineType.CpuEnum
+            });
+            fakeMachines.Add(new Machines()
+            {
+                Amount = 1,
+                Type = MachineType.GpuEnum
+            });
+        }
+
         public TotalResources GetAllResources()
         {
             throw new System.NotImplementedException();
@@ -15,7 +31,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
         public IEnumerable<Machines> GetMachinesInfo()
         {
-            throw new System.NotImplementedException();
+            return fakeMachines;
         }
     }
 }
