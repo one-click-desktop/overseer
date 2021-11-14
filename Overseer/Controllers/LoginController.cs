@@ -4,6 +4,7 @@ using System;
 using OneClickDesktop.Api.Controllers;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.Overseer.Services.Interfaces;
+using OneClickDesktop.Overseer.Authorization;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
@@ -11,13 +12,14 @@ namespace OneClickDesktop.Overseer.Controllers
     [ApiController]
     public class LoginController : LoginApiController
     {
-        private readonly ILoginService loginService;
+        private readonly IUserService loginService;
 
-        public LoginController(ILoginService loginService)
+        public LoginController(IUserService loginService)
         {
             this.loginService = loginService;
         }
 
+        [AllowAnonymous]
         public override IActionResult Login([FromBody] Login login)
         {
             Token token = loginService.Login(login);

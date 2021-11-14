@@ -1,12 +1,13 @@
 ﻿
 using OneClickDesktop.Api.Models;
+using OneClickDesktop.Overseer.Entities;
 
 namespace OneClickDesktop.Overseer.Services.Interfaces
 {
     /// <summary>
     /// Service pilnujący logowania i autoryzacji
     /// </summary>
-    public interface ILoginService
+    public interface IUserService
     {
         /// <summary>
         /// Metoda sprawdza, czy dane logowania sa prawidłowe.
@@ -14,5 +15,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// <param name="loginData">Dane logowania uzytkownika</param>
         /// <returns>Token przy prawidłowych danych. Null wpw.</returns>
         Token Login(Login loginData);
+
+        User GetUserById(int id);
     }
 }

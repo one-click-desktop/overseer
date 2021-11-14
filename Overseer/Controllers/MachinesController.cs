@@ -19,17 +19,7 @@ namespace OneClickDesktop.Overseer.Controllers
             this.resourcesService = machinesService;
         }
 
-        [Authorize(Roles = Role.User)]
         public override IActionResult GetMachines()
-        {
-            var machines = resourcesService.GetMachinesInfo();
-            return Ok(machines);
-        }
-
-        [Authorize(Roles = Role.User)]
-        [HttpGet]
-        [Route("/machines2")]
-        public IActionResult GetMachines2()
         {
             var machines = resourcesService.GetMachinesInfo();
             return Ok(machines);

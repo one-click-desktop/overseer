@@ -1,6 +1,8 @@
-﻿namespace OneClickDesktop.Overseer.Authorization
+﻿using System;
+
+namespace OneClickDesktop.Overseer.Authorization
 {
-    public class AllowAnonymousAttribute
-    {
-    }
+    [AttributeUsage(AttributeTargets.Method)]
+    public class AllowAnonymousAttribute : Attribute
+    { }
 }
