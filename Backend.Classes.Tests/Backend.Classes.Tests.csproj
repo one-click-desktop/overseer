@@ -24,4 +24,8 @@
     <ProjectReference Include="..\Backend.Classes\Backend.Classes.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ModelTests\" />
+  </ItemGroup>
+
 </Project>
