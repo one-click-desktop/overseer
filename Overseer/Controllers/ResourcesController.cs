@@ -7,6 +7,7 @@ using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ResourcesController : ResourcesApiController
@@ -21,7 +22,7 @@ namespace OneClickDesktop.Overseer.Controllers
         [Authorize(Role.Admin)]
         public override IActionResult GetResources()
         {
-            throw new System.NotImplementedException();
+            return Ok();
         }
     }
 }

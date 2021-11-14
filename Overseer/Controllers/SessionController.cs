@@ -4,9 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 using OneClickDesktop.Api.Controllers;
 using OneClickDesktop.Overseer.Services.Interfaces;
+using OneClickDesktop.Overseer.Authorization;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SessionController : SessionApiController

@@ -8,6 +8,7 @@ using OneClickDesktop.Overseer.Authorization;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LoginController : LoginApiController

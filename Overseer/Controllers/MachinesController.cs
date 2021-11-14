@@ -3,14 +3,16 @@ using System;
 
 using OneClickDesktop.Api.Controllers;
 using OneClickDesktop.Overseer.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using OneClickDesktop.Overseer.Helpers;
+using OneClickDesktop.Overseer.Entities;
+using OneClickDesktop.Overseer.Authorization;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class MachinesController : MachinesApiController
+    public class MachinesController : ControllerBase// : MachinesApiController
     {
         private readonly IResourcesService resourcesService;
 
@@ -19,7 +21,10 @@ namespace OneClickDesktop.Overseer.Controllers
             this.resourcesService = machinesService;
         }
 
-        public override IActionResult GetMachines()
+        [Authorize(Role.User, Role.Admin)]
+        [HttpGet]
+        [Route("machines")]
+        public IActionResult GetMachines()
         {
             var machines = resourcesService.GetMachinesInfo();
             return Ok(machines);

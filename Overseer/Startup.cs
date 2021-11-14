@@ -46,6 +46,7 @@ namespace OneClickDesktop.Overseer
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
 
+            services.AddScoped<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<ISessionService, SessionService>();
@@ -60,8 +61,10 @@ namespace OneClickDesktop.Overseer
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
         {
+            createTestUsers(context);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -97,8 +100,8 @@ namespace OneClickDesktop.Overseer
             var testUsers = new List<User>
             {
                 new User() { Id = 1, Username = "user1", Password = "user1_pass", Role = Role.User },
-                new User() { Id = 1, Username = "user2", Password = "user2_pass", Role = Role.User },
-                new User() { Id = 1, Username = "admin1", Password = "admin1_pass", Role = Role.Admin }
+                new User() { Id = 2, Username = "user2", Password = "user2_pass", Role = Role.User },
+                new User() { Id = 3, Username = "admin1", Password = "admin1_pass", Role = Role.Admin }
             };
             context.Users.AddRange(testUsers);
             context.SaveChanges();
