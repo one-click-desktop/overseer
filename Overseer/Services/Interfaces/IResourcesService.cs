@@ -23,6 +23,6 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// Docelowo dane maja wyladowac w aplikacji klienckiej.
         /// </summary>
         /// <returns>Kolekcja obiektów, które opisują licznośc i typ maszyny.</returns>
-        IEnumerable<Machines> GetMachinesInfo();
+        IEnumerable<Machine> GetMachinesInfo();
     }
 }
