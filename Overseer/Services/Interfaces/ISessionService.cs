@@ -23,7 +23,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// </summary>
         /// <param name="sessionGuid">Identyfikator sesji.</param>
         /// <param name="userGuid">Identyfikator uzytkownika, który pyta</param>
-        /// <returns>Zwraca obiekt reprezentujący sesję, jeżeli jest w pełni utworzona. Wpw. zwraca <c>null</c>.</returns>
+        /// <returns>Zwraca obiekt reprezentujący sesję, częściową lub pełną.</returns>
         Session AskForSession(string sessionGuid, string userGuid);
 
         /// <summary>

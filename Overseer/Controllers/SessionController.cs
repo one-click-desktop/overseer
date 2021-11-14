@@ -5,6 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using OneClickDesktop.Api.Controllers;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.Overseer.Authorization;
+using OneClickDesktop.Overseer.Entities;
+using OneClickDesktop.Api.Models;
+
+using Session = OneClickDesktop.Api.Models.Session;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
@@ -15,25 +19,37 @@ namespace OneClickDesktop.Overseer.Controllers
     {
         private readonly ISessionService sessionService;
 
+        private User RequestUser => (User)HttpContext.Items["User"];
+
         public SessionController(ISessionService sessionService)
         {
             this.sessionService = sessionService;
         }
 
-
         public override IActionResult DeleteSession([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
-            throw new NotImplementedException();
+            sessionService.CancelSession(sessionId, RequestUser.Id.ToString());
+            return Ok("Sessions succefuly canceled");
         }
 
         public override IActionResult GetSession([FromBody] string body)
         {
-            throw new NotImplementedException();
+            Enum.TryParse(body, out MachineType sessionType);
+            string sessionId = sessionService.RequestSession(sessionType, RequestUser.Id.ToString());
+
+            return Ok(new Session()
+            {
+                Address = null,
+                Id = sessionId,
+                Status = SessionStatus.PendingEnum,
+                Type = sessionType
+            });
         }
 
         public override IActionResult GetSessionStatus([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
-            throw new NotImplementedException();
+            Session res = sessionService.AskForSession(sessionId, RequestUser.Id.ToString());
+            return Ok(res);
         }
     }
 }

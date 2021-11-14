@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 using OneClickDesktop.Api.Controllers;
+using OneClickDesktop.Api.Models;
 using OneClickDesktop.Overseer.Authorization;
 using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Services.Interfaces;
@@ -22,7 +23,8 @@ namespace OneClickDesktop.Overseer.Controllers
         [Authorize(Role.Admin)]
         public override IActionResult GetResources()
         {
-            throw new System.NotImplementedException();
+            TotalResources result = resourcesService.GetAllResources();
+            return Ok(result);
         }
     }
 }

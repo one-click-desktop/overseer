@@ -33,10 +33,6 @@ namespace OneClickDesktop.Overseer.Helpers
                 res.Message = error.Message;
                 switch (error)
                 {
-                    case AppException e:
-                        // custom application error
-                        res.Code = (int)HttpStatusCode.BadRequest;
-                        break;
                     case HttpException e:
                         res.Code = e.ErrorCode;
                         break;
