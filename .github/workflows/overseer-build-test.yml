@@ -15,9 +15,6 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.x'
-      # Tymczasowo dodanie lokalnych pakietow
-      - name: Add local packages
-        run: dotnet nuget add source /home/runner/work/overseer/overseer/Overseer/packages/
       - name: Restore packages  
         run: dotnet restore
       - name: Build Overseer
