@@ -8,7 +8,7 @@ using OneClickDesktop.Overseer.Authorization;
 using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Api.Models;
 
-using Session = OneClickDesktop.Api.Models.Session;
+using SessionDTO  = OneClickDesktop.Api.Models.SessionDTO ;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
 
 namespace OneClickDesktop.Overseer.Controllers
@@ -35,22 +35,22 @@ namespace OneClickDesktop.Overseer.Controllers
 
         public override IActionResult GetSession([FromBody] string body)
         {
-            if (!Enum.TryParse(body, out MachineType sessionType))
+            if (!Enum.TryParse(body, out MachineTypeDTO  sessionType))
                 throw new ErrorHttpException("Wrong session type", System.Net.HttpStatusCode.BadRequest);
             string sessionId = sessionService.RequestSession(sessionType, RequestUser.Id.ToString());
 
-            return Ok(new Session()
+            return Ok(new SessionDTO ()
             {
                 Address = null,
                 Id = sessionId,
-                Status = SessionStatus.PendingEnum,
+                Status = SessionStatusDTO.PendingEnum,
                 Type = sessionType
             });
         }
 
         public override IActionResult GetSessionStatus([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
-            Session res = sessionService.AskForSession(sessionId, RequestUser.Id.ToString());
+            SessionDTO  res = sessionService.AskForSession(sessionId, RequestUser.Id.ToString());
             return Ok(res);
         }
     }

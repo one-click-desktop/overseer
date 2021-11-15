@@ -26,9 +26,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
             this.context = context;
         }
 
-        public Token Login(Login loginData)
+        public TokenDTO Login(LoginDTO loginData)
         {
-            var user = context.Users.SingleOrDefault(x => x.Username == loginData._Login);
+            var user = context.Users.SingleOrDefault(x => x.Username == loginData.Login);
 
             // validate
             if (user == null || loginData.Password != user.Password)
@@ -37,7 +37,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             // authentication successful so generate jwt token
             var jwtToken = jwtUtils.GenerateJwtToken(user);
 
-            return new Token() { _Token = jwtToken };
+            return new TokenDTO() { Token = jwtToken };
         }
 
         public User GetUserById(int id)

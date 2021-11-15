@@ -23,7 +23,7 @@ namespace OneClickDesktop.Overseer.Controllers
         [Authorize(Role.Admin)]
         public override IActionResult GetResources()
         {
-            TotalResources result = resourcesService.GetAllResources();
+            TotalResourcesDTO result = resourcesService.GetAllResources();
             return Ok(result);
         }
     }

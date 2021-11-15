@@ -15,7 +15,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// <param name="type">Typ sesji do utworzenia</param>
         /// <param name="userGuid">Identyfikator uzytkownika, dla którego utworzyć sesję.</param>
         /// <returns>Identyfikator sesji do późniejszego odwołania się.</returns>
-        string RequestSession(MachineType type, string userGuid);
+        string RequestSession(MachineTypeDTO  type, string userGuid);
 
         /// <summary>
         /// Metoda sprawdza czy sesja o danym identyfikatorze jest juz w pełni utworzona w systemie.
@@ -24,7 +24,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// <param name="sessionGuid">Identyfikator sesji.</param>
         /// <param name="userGuid">Identyfikator uzytkownika, który pyta</param>
         /// <returns>Zwraca obiekt reprezentujący sesję, częściową lub pełną.</returns>
-        Session AskForSession(string sessionGuid, string userGuid);
+        SessionDTO  AskForSession(string sessionGuid, string userGuid);
 
         /// <summary>
         /// Metoda zgłasza do systemu prośbę o anulowanie sesji o danym identyfikatorze.

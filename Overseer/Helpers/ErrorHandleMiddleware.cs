@@ -29,7 +29,7 @@ namespace OneClickDesktop.Overseer.Helpers
                 var response = context.Response;
                 response.ContentType = "application/json";
 
-                Error res = new Error();
+                ErrorDTO res = new ErrorDTO();
                 res.Message = error.Message;
                 switch (error)
                 {

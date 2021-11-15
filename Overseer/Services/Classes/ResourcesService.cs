@@ -8,68 +8,68 @@ namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class ResourcesService : IResourcesService
     {
-        private List<Machine> fakeMachines;
-        private TotalResources fakeTotalResources;
+        private List<MachineDTO> fakeMachines;
+        private TotalResourcesDTO fakeTotalResources;
 
         public ResourcesService()
         {
-            fakeMachines = new List<Machine>();
-            fakeMachines.Add(new Machine()
+            fakeMachines = new List<MachineDTO>();
+            fakeMachines.Add(new MachineDTO()
             {
                 Amount = 2,
-                Type = MachineType.CpuEnum
+                Type = MachineTypeDTO.CpuEnum
             });
-            fakeMachines.Add(new Machine()
+            fakeMachines.Add(new MachineDTO()
             {
                 Amount = 0,
-                Type = MachineType.GpuEnum
+                Type = MachineTypeDTO.GpuEnum
             });
 
-            fakeTotalResources = new TotalResources();
-            fakeTotalResources.Servers = new List<Server>()
+            fakeTotalResources = new TotalResourcesDTO();
+            fakeTotalResources.Servers = new List<ServerDTO>()
             {
-                new Server()
+                new ServerDTO()
                 {
-                    Address = new IpAddress()
+                    Address = new IpAddressDTO()
                     {
                         Address = "10.0.10.99",
                         Port = 3389
                     },
                     Name = "fakeServer1",
-                    Free = new List<Machine>()
+                    Free = new List<MachineDTO>()
                     {
-                        new Machine() { Amount = 2, Type = MachineType.CpuEnum },
-                        new Machine() { Amount = 0, Type = MachineType.GpuEnum },
+                        new MachineDTO() { Amount = 2, Type = MachineTypeDTO.CpuEnum },
+                        new MachineDTO() { Amount = 0, Type = MachineTypeDTO.GpuEnum },
                     },
-                    Running = new List<Machine>()
+                    Running = new List<MachineDTO>()
                     {
-                        new Machine() { Amount = 0, Type = MachineType.CpuEnum },
-                        new Machine() { Amount = 1, Type = MachineType.GpuEnum },
+                        new MachineDTO() { Amount = 0, Type = MachineTypeDTO.CpuEnum },
+                        new MachineDTO() { Amount = 1, Type = MachineTypeDTO.GpuEnum },
                     },
-                    Resources = new Resources()
+                    Resources = new ResourcesDTO()
                     {
-                        Cpu = new Resource() { Total = 8, Free = 4},
-                        Gpu = new Resource() { Total = 1, Free = 0},
-                        Memory = new Resource() { Total = 8192, Free = 4096 },
-                        Storage = new Resource() { Total = 500, Free = 450 }
+                        Cpu = new ResourceDTO() { Total = 8, Free = 4},
+                        Gpu = new ResourceDTO() { Total = 1, Free = 0},
+                        Memory = new ResourceDTO() { Total = 8192, Free = 4096 },
+                        Storage = new ResourceDTO() { Total = 500, Free = 450 }
                     }
                 }
             };
-            fakeTotalResources.Total = new Resources()
+            fakeTotalResources.Total = new ResourcesDTO()
             {
-                Cpu = new Resource() { Total = 8, Free = 4 },
-                Gpu = new Resource() { Total = 1, Free = 0 },
-                Memory = new Resource() { Total = 8192, Free = 4096 },
-                Storage = new Resource() { Total = 500, Free = 450 }
+                Cpu = new ResourceDTO() { Total = 8, Free = 4 },
+                Gpu = new ResourceDTO() { Total = 1, Free = 0 },
+                Memory = new ResourceDTO() { Total = 8192, Free = 4096 },
+                Storage = new ResourceDTO() { Total = 500, Free = 450 }
             };
         }
 
-        public TotalResources GetAllResources()
+        public TotalResourcesDTO GetAllResources()
         {
             return fakeTotalResources;
         }
 
-        public IEnumerable<Machine> GetMachinesInfo()
+        public IEnumerable<MachineDTO> GetMachinesInfo()
         {
             return fakeMachines;
         }

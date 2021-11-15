@@ -14,7 +14,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// </summary>
         /// <param name="loginData">Dane logowania uzytkownika</param>
         /// <returns>Token przy prawidłowych danych. Null wpw.</returns>
-        Token Login(Login loginData);
+        TokenDTO Login(LoginDTO loginData);
 
         User GetUserById(int id);
     }
