@@ -11,18 +11,31 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private List<MachineDTO> fakeMachines;
         private TotalResourcesDTO fakeTotalResources;
 
+
+
         public ResourcesService()
         {
+            MachineTypeDTO cpu = new MachineTypeDTO()
+            {
+                Code = 1,
+                Name = "cpu"
+            };
+            MachineTypeDTO gpu = new MachineTypeDTO()
+            {
+                Code = 1,
+                Name = "gpu"
+            };
+
             fakeMachines = new List<MachineDTO>();
             fakeMachines.Add(new MachineDTO()
             {
                 Amount = 2,
-                Type = MachineTypeDTO.CpuEnum
+                Type = cpu
             });
             fakeMachines.Add(new MachineDTO()
             {
                 Amount = 0,
-                Type = MachineTypeDTO.GpuEnum
+                Type = gpu
             });
 
             fakeTotalResources = new TotalResourcesDTO();
@@ -38,13 +51,13 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     Name = "fakeServer1",
                     Free = new List<MachineDTO>()
                     {
-                        new MachineDTO() { Amount = 2, Type = MachineTypeDTO.CpuEnum },
-                        new MachineDTO() { Amount = 0, Type = MachineTypeDTO.GpuEnum },
+                        new MachineDTO() { Amount = 2, Type = cpu },
+                        new MachineDTO() { Amount = 0, Type = gpu },
                     },
                     Running = new List<MachineDTO>()
                     {
-                        new MachineDTO() { Amount = 0, Type = MachineTypeDTO.CpuEnum },
-                        new MachineDTO() { Amount = 1, Type = MachineTypeDTO.GpuEnum },
+                        new MachineDTO() { Amount = 0, Type = cpu },
+                        new MachineDTO() { Amount = 1, Type = gpu },
                     },
                     Resources = new ResourcesDTO()
                     {
