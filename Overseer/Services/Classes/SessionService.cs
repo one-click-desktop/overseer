@@ -33,6 +33,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
         public string RequestSession(MachineTypeDTO  type, string userGuid)
         {
+            //TODO: Dodac validace czy typ sesji jest dopuszczalny w systemie
             string sessionGuid = Guid.NewGuid().ToString();
             fakeSessionList.Add(sessionGuid, (new SessionDTO ()
             {
