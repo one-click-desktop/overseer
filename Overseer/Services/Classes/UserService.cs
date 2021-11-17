@@ -40,7 +40,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             // authentication successful so generate jwt token
             var jwtToken = jwtUtils.GenerateJwtToken(user);
 
-            return new TokenDTO() { Token = jwtToken, Role = GetEnumForRole(user.Role) };
+            return new TokenDTO() { Token = jwtToken, Role = user.Role };
         }
 
         public User GetUserById(int id)
@@ -48,19 +48,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var user = context.Users.Find(id);
             if (user == null) throw new KeyNotFoundException("User not found");
             return user;
-        }
-
-        private TokenDTO.RoleEnum GetEnumForRole(Role role)
-        {
-            switch (role)
-            {
-                case Role.Admin:
-                    return TokenDTO.RoleEnum.Admin;
-                case Role.User:
-                    return TokenDTO.RoleEnum.User;
-                default:
-                    throw new InvalidEnumArgumentException("Unknown role");
-            }
         }
     }
 }
