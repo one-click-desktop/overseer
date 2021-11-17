@@ -41,7 +41,8 @@ namespace OneClickDesktop.Overseer.Helpers
                         res.Code = (int)HttpStatusCode.InternalServerError;
                         break;
                 }
-
+                
+                response.StatusCode = res.Code;
                 var result = JsonSerializer.Serialize(res);
                 await response.WriteAsync(result);
             }
