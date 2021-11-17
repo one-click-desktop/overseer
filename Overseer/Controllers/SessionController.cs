@@ -47,7 +47,7 @@ namespace OneClickDesktop.Overseer.Controllers
             {
                 Address = null,
                 Id = sessionId,
-                Status = SessionStatusDTO.PendingEnum,
+                Status = SessionStatusDTO.Pending,
                 Type = machineTypeDTO
             });
         }
