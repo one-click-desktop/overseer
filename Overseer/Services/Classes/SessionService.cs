@@ -43,7 +43,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     Port = 12345
                 },
                 Id = sessionGuid,
-                Status = SessionStatusDTO.PendingEnum,
+                Status = SessionStatusDTO.Ready,
                 Type = type
             }, userGuid));
 

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Options;
@@ -37,7 +40,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             // authentication successful so generate jwt token
             var jwtToken = jwtUtils.GenerateJwtToken(user);
 
-            return new TokenDTO() { Token = jwtToken };
+            return new TokenDTO() { Token = jwtToken, Role = GetEnumForRole(user.Role) };
         }
 
         public User GetUserById(int id)
@@ -45,6 +48,19 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var user = context.Users.Find(id);
             if (user == null) throw new KeyNotFoundException("User not found");
             return user;
+        }
+
+        private TokenDTO.RoleEnum GetEnumForRole(Role role)
+        {
+            switch (role)
+            {
+                case Role.Admin:
+                    return TokenDTO.RoleEnum.Admin;
+                case Role.User:
+                    return TokenDTO.RoleEnum.User;
+                default:
+                    throw new InvalidEnumArgumentException("Unknown role");
+            }
         }
     }
 }

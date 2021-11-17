@@ -66,12 +66,12 @@ namespace OneClickDesktop.Overseer
             if (!env.IsDevelopment())
             {
                 app.UseHttpsRedirection();
-                app.UseCors(x => x
-                     .AllowAnyOrigin()
-                     .AllowAnyMethod()
-                     .AllowAnyHeader());
             }
-
+            
+            app.UseCors(x => x
+                             .AllowAnyOrigin()
+                             .AllowAnyMethod()
+                             .AllowAnyHeader());
             app.UseRouting();
 
             // global error handler
