@@ -11,6 +11,7 @@ using OneClickDesktop.Overseer.Services.Classes;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using OneClickDesktop.Api.Models;
 
 namespace OneClickDesktop.Overseer
 {
@@ -63,14 +64,16 @@ namespace OneClickDesktop.Overseer
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Overseer v1"));
             }
 
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
+            if (!env.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
+            
             app.UseCors(x => x
-                 .AllowAnyOrigin()
-                 .AllowAnyMethod()
-                 .AllowAnyHeader());
+                             .AllowAnyOrigin()
+                             .AllowAnyMethod()
+                             .AllowAnyHeader());
+            app.UseRouting();
 
             // global error handler
             app.UseMiddleware<ErrorHandlerMiddleware>();
@@ -88,9 +91,9 @@ namespace OneClickDesktop.Overseer
             // add hardcoded test users to db on startup
             var testUsers = new List<User>
             {
-                new User() { Id = 1, Username = "user1", Password = "user1_pass", Role = Role.User },
-                new User() { Id = 2, Username = "user2", Password = "user2_pass", Role = Role.User },
-                new User() { Id = 3, Username = "admin1", Password = "admin1_pass", Role = Role.Admin }
+                new User() { Id = 1, Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = 2, Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = 3, Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
             };
             context.Users.AddRange(testUsers);
             context.SaveChanges();

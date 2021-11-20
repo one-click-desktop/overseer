@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Options;
@@ -26,9 +29,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
             this.context = context;
         }
 
-        public Token Login(Login loginData)
+        public TokenDTO Login(LoginDTO loginData)
         {
-            var user = context.Users.SingleOrDefault(x => x.Username == loginData._Login);
+            var user = context.Users.SingleOrDefault(x => x.Username == loginData.Login);
 
             // validate
             if (user == null || loginData.Password != user.Password)
@@ -37,7 +40,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             // authentication successful so generate jwt token
             var jwtToken = jwtUtils.GenerateJwtToken(user);
 
-            return new Token() { _Token = jwtToken };
+            return new TokenDTO() { Token = jwtToken, Role = user.Role };
         }
 
         public User GetUserById(int id)

@@ -29,7 +29,7 @@ namespace OneClickDesktop.Overseer.Helpers
                 var response = context.Response;
                 response.ContentType = "application/json";
 
-                Error res = new Error();
+                ErrorDTO res = new ErrorDTO();
                 res.Message = error.Message;
                 switch (error)
                 {
@@ -41,7 +41,8 @@ namespace OneClickDesktop.Overseer.Helpers
                         res.Code = (int)HttpStatusCode.InternalServerError;
                         break;
                 }
-
+                
+                response.StatusCode = res.Code;
                 var result = JsonSerializer.Serialize(res);
                 await response.WriteAsync(result);
             }

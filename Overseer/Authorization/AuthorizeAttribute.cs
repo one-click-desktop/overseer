@@ -13,11 +13,11 @@ namespace OneClickDesktop.Overseer.Authorization
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class AuthorizeAttribute : Attribute, IAuthorizationFilter
     {
-        private readonly IList<Role> _roles;
+        private readonly IList<TokenDTO.RoleEnum> _roles;
 
-        public AuthorizeAttribute(params Role[] roles)
+        public AuthorizeAttribute(params TokenDTO.RoleEnum[] roles)
         {
-            _roles = roles ?? new Role[] { };
+            _roles = roles ?? new TokenDTO.RoleEnum[] { };
         }
 
         public void OnAuthorization(AuthorizationFilterContext context)

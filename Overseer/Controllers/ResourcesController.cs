@@ -20,10 +20,10 @@ namespace OneClickDesktop.Overseer.Controllers
             this.resourcesService = machinesService;
         }
 
-        [Authorize(Role.Admin)]
+        [Authorize(TokenDTO.RoleEnum.Admin)]
         public override IActionResult GetResources()
         {
-            TotalResources result = resourcesService.GetAllResources();
+            TotalResourcesDTO result = resourcesService.GetAllResources();
             return Ok(result);
         }
     }

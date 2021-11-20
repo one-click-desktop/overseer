@@ -8,7 +8,7 @@ using OneClickDesktop.Overseer.Authorization;
 using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Api.Models;
 
-using Session = OneClickDesktop.Api.Models.Session;
+using SessionDTO  = OneClickDesktop.Api.Models.SessionDTO ;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
 
 namespace OneClickDesktop.Overseer.Controllers
@@ -33,25 +33,23 @@ namespace OneClickDesktop.Overseer.Controllers
             return Ok("Sessions succefuly canceled");
         }
 
-        public override IActionResult GetSession([FromBody] string body)
+        public override IActionResult GetSessionStatus([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
-            if (!Enum.TryParse(body, out MachineType sessionType))
-                throw new ErrorHttpException("Wrong session type", System.Net.HttpStatusCode.BadRequest);
-            string sessionId = sessionService.RequestSession(sessionType, RequestUser.Id.ToString());
+            SessionDTO  res = sessionService.AskForSession(sessionId, RequestUser.Id.ToString());
+            return Ok(res);
+        }
 
-            return Ok(new Session()
+        public override IActionResult GetSession([FromBody] MachineTypeDTO machineTypeDTO)
+        {
+            string sessionId = sessionService.RequestSession(machineTypeDTO, RequestUser.Id.ToString());
+
+            return Ok(new SessionDTO()
             {
                 Address = null,
                 Id = sessionId,
-                Status = SessionStatus.PendingEnum,
-                Type = sessionType
+                Status = SessionStatusDTO.Pending,
+                Type = machineTypeDTO
             });
-        }
-
-        public override IActionResult GetSessionStatus([FromRoute(Name = "sessionId"), Required] string sessionId)
-        {
-            Session res = sessionService.AskForSession(sessionId, RequestUser.Id.ToString());
-            return Ok(res);
         }
     }
 }

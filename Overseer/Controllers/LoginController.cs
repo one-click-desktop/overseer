@@ -21,9 +21,9 @@ namespace OneClickDesktop.Overseer.Controllers
         }
 
         [AllowAnonymous]
-        public override IActionResult Login([FromBody] Login login)
+        public override IActionResult Login([FromBody] LoginDTO login)
         {
-            Token token = loginService.Login(login);
+            TokenDTO token = loginService.Login(login);
 
             return Ok(token);
         }
