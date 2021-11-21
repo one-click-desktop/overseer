@@ -1,6 +1,5 @@
 ﻿
 using OneClickDesktop.Api.Models;
-using OneClickDesktop.Backend.Classes;
 
 namespace OneClickDesktop.Overseer.Services.Interfaces
 {

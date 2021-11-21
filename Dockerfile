@@ -3,8 +3,6 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0
 WORKDIR /overseer
 
 #Skopiowanie potrzebnych danych
-COPY  Backend.Classes Backend.Classes/
-COPY  Backend.Classes.Tests Backend.Classes.Tests/
 COPY  Overseer Overseer/
 COPY Overseer.sln .
 RUN ls -l
@@ -16,4 +14,6 @@ RUN dotnet publish -o out
 #Uruchomienie aplikacji
 EXPOSE 5000
 EXPOSE 5001
+
+#Dodac tutaj from runtime i kopia binarek z poprzedniej warstwy!!!
 ENTRYPOINT ["dotnet", "out/OneClickDesktop.Overseer.dll"]
