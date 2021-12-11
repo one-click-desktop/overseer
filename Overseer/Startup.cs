@@ -37,7 +37,11 @@ namespace OneClickDesktop.Overseer
 
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
-
+            
+            //singleton - model (zapytania publiczne muszą byc thread-safe!!!)
+            services.AddSingleton<ISystemModelService, SystemModelService>();
+            //singleton - rabbitSender(oddzielny watek)
+            //singleton - rabbit receiver(oddzielny watek)
             services.AddScoped<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
