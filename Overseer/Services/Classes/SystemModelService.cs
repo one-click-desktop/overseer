@@ -11,14 +11,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
         private SystemModel model = new SystemModel();
         private ReaderWriterLock rwLock = new ReaderWriterLock();
-
-
+        
         public void UpdateServerInfo(VirtualizationServer serverInfo)
         {
             try
             {
                 rwLock.AcquireWriterLock(Timeout.Infinite);
-                
                 model.UpdateOrAddServer(serverInfo);
             }
             catch (Exception e)

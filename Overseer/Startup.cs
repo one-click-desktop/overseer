@@ -11,7 +11,9 @@ using OneClickDesktop.Overseer.Services.Classes;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.Api.Models;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
+using NLog.Fluent;
 
 namespace OneClickDesktop.Overseer
 {
@@ -40,12 +42,14 @@ namespace OneClickDesktop.Overseer
             
             //singleton - model (zapytania publiczne muszą byc thread-safe!!!)
             services.AddSingleton<ISystemModelService, SystemModelService>();
-            //singleton - rabbitSender(oddzielny watek)
-            //singleton - rabbit receiver(oddzielny watek)
+            //singleton - rabbit receiver/sender(oddzielny watek)
+            services.AddSingleton<IVirtualizationServerConnectionService, VirtualizationServerConnectionService>();
             services.AddScoped<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<ISessionService, SessionService>();
+            
+            var test = new VirtualizationServerConnectionService(new SystemModelService());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

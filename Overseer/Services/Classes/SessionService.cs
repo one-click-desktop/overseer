@@ -12,6 +12,13 @@ namespace OneClickDesktop.Overseer.Services.Classes
     {
         private static Dictionary<string, (SessionDTO  ses, string user)> fakeSessionList = new Dictionary<string, (SessionDTO  ses, string user)>();
 
+        private readonly IVirtualizationServerConnectionService virtSrvConnection;
+
+        public SessionService(IVirtualizationServerConnectionService virtSrvConnection)
+        {
+            this.virtSrvConnection = virtSrvConnection;
+        }
+
         private SessionDTO  FindSession(string sessionGuid, string userGuid)
         {
             if (!fakeSessionList.TryGetValue(sessionGuid, out (SessionDTO  ses, string user) session) || session.user != userGuid)
