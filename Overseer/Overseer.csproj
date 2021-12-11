@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.12" />
     <PackageReference Include="OneClickDesktop.Api" Version="1.0.9" />
+    <PackageReference Include="OneClickDesktop.RabbitModule.Overseer" Version="1.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
