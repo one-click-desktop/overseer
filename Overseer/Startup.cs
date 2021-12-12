@@ -49,7 +49,7 @@ namespace OneClickDesktop.Overseer
             services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<ISessionService, SessionService>();
             
-            var test = new VirtualizationServerConnectionService(new SystemModelService());
+            //var test = new VirtualizationServerConnectionService(new SystemModelService());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -64,6 +64,9 @@ namespace OneClickDesktop.Overseer
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
         {
             createTestUsers(context);
+
+            //Wymuszenie uruchomienia modułu do komunikajci z rabbitem
+            app.ApplicationServices.GetService<IVirtualizationServerConnectionService>();
 
             if (env.IsDevelopment())
             {

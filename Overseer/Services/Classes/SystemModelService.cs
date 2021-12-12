@@ -14,6 +14,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
         
         public void UpdateServerInfo(VirtualizationServer serverInfo)
         {
+            if (serverInfo == null)
+                return;
+            
             try
             {
                 rwLock.AcquireWriterLock(Timeout.Infinite);

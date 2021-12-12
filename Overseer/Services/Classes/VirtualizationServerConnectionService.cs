@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Text.Json;
+using OneClickDesktop.BackendClasses.Communication.MessagesTemplates;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.Overseer.IndependentServices;
 using OneClickDesktop.Overseer.Messages;
@@ -42,7 +43,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 MessageTypeMappings = new Dictionary<string, Type>()
                 {
-                    {ModelReportMessage.StaticType, typeof(VirtualizationServer)}
+                    {ModelReportMessage.MessageTypeName, typeof(VirtualizationServer)}
                 },
                 RabbitMQHostname = "localhost",
                 RabbitMQPort = 5672
@@ -66,9 +67,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <param name="args"></param>
         private void ReceiveModelReport(object sender, MessageEventArgs args)
         {
-            if (args.RabbitMessage.Type == ModelReportMessage.StaticType)
+            if (args.RabbitMessage.Type == ModelReportMessage.MessageTypeName)
             {
-                VirtualizationServer data = args.RabbitMessage.Message as VirtualizationServer;
+                VirtualizationServer data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Message);
                 modelService.UpdateServerInfo(data);
             }
         }
