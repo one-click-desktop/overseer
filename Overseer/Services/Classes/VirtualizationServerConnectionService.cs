@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading;
 using System.Text.Json;
-using OneClickDesktop.BackendClasses.Communication.MessagesTemplates;
+using OneClickDesktop.BackendClasses.Communication;
 using OneClickDesktop.BackendClasses.Model;
-using OneClickDesktop.Overseer.IndependentServices;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.RabbitModule.Common.EventArgs;
@@ -41,10 +41,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             //[TODO][CONFIG] Wynieść do konfiguracji!
             VirtualizationServerConnectionParameters parameters = new VirtualizationServerConnectionParameters()
             {
-                MessageTypeMappings = new Dictionary<string, Type>()
-                {
-                    {ModelReportMessage.MessageTypeName, typeof(VirtualizationServer)}
-                },
+                MessageTypeMappings = TypeMappings.OverseerReceiveMapping,
                 RabbitMQHostname = "localhost",
                 RabbitMQPort = 5672
             };
