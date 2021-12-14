@@ -1,15 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
-
+using Microsoft.AspNetCore.Mvc;
 using OneClickDesktop.Api.Controllers;
-using OneClickDesktop.Overseer.Services.Interfaces;
+using OneClickDesktop.Api.Models;
 using OneClickDesktop.Overseer.Authorization;
 using OneClickDesktop.Overseer.Entities;
-using OneClickDesktop.Api.Models;
-
-using SessionDTO  = OneClickDesktop.Api.Models.SessionDTO ;
-using OneClickDesktop.Overseer.Helpers.Exceptions;
+using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Controllers
 {
@@ -29,24 +25,23 @@ namespace OneClickDesktop.Overseer.Controllers
 
         public override IActionResult DeleteSession([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
-            sessionService.CancelSession(sessionId, RequestUser.Id.ToString());
+            sessionService.CancelSession(Guid.Parse(sessionId), RequestUser.Id);
             return Ok("Sessions successfully canceled");
         }
 
         public override IActionResult GetSessionStatus([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
-            SessionDTO  res = sessionService.AskForSession(sessionId, RequestUser.Id.ToString());
+            var res = sessionService.AskForSession(Guid.Parse(sessionId), RequestUser.Id);
             return Ok(res);
         }
 
         public override IActionResult GetSession([FromBody] MachineTypeDTO machineTypeDTO)
         {
-            string sessionId = sessionService.RequestSession(machineTypeDTO, RequestUser.Id.ToString());
-
+            var sessionId = sessionService.RequestSession(machineTypeDTO, RequestUser.Id);
             return Ok(new SessionDTO()
             {
                 Address = null,
-                Id = sessionId,
+                Id = sessionId.ToString(),
                 Status = SessionStatusDTO.Pending,
                 Type = machineTypeDTO
             });

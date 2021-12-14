@@ -1,22 +1,21 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+using NLog;
 using OneClickDesktop.BackendClasses.Model;
-using OneClickDesktop.BackendClasses.Model.Resources;
-using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class SystemModelService: ISystemModelService
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         private SystemModel model = new SystemModel();
         private ReaderWriterLock rwLock = new ReaderWriterLock();
-        
+
+        public event EventHandler<Guid> ServerUpdated;
+
         public void UpdateServerInfo(VirtualizationServer serverInfo)
         {
             if (serverInfo == null)
@@ -26,6 +25,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 rwLock.AcquireWriterLock(Timeout.Infinite);
                 model.UpdateOrAddServer(serverInfo);
+                UpdateModelSessions(serverInfo);
+                ServerUpdated?.Invoke(this, serverInfo.ServerGuid);
             }
             catch (Exception e)
             {
@@ -37,38 +38,22 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
         }
 
-        public IEnumerable<Machine> GetMachines()
+        private void UpdateModelSessions(VirtualizationServer server)
         {
-            IEnumerable<Machine> machines = null;
-            try
+            foreach (var (_, session) in server.Sessions)
             {
-                rwLock.AcquireReaderLock(Timeout.Infinite);
-                machines = model.Servers.Values.SelectMany(server => server.RunningMachines.Values);
+                // this function will be added in new model library version
+                // model.UpdateOrAddSession(session);
             }
-            catch (Exception e)
-            {
-                logger.Warn(e, "Error on reading machines from model");
-            }
-            finally
-            {
-                rwLock.ReleaseReaderLock();
-            }
-            
-            return machines;
         }
-        
-        public IEnumerable<ServerResourcesInfo> GetServersResources()
+
+        public IEnumerable<VirtualizationServer> GetServers()
         {
-            IEnumerable<ServerResourcesInfo> resources = null;
+            IEnumerable<VirtualizationServer> servers = null;
             try
             {
                 rwLock.AcquireReaderLock(Timeout.Infinite);
-                resources = model.Servers.Values.Select(server => new ServerResourcesInfo()
-                {
-                    TotalResources = server.TotalServerResources, 
-                    FreeResources = server.FreeServerResources,
-                    Machines = server.RunningMachines.Values
-                });
+                servers = model.Servers.Values;
             }
             catch (Exception e)
             {
@@ -79,7 +64,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 rwLock.ReleaseReaderLock();
             }
             
-            return resources;
+            return servers;
+        }
+
+        public Session GetSession(Guid sessionGuid)
+        {
+            return model.GetSessionInfo(sessionGuid);
         }
     }
 }

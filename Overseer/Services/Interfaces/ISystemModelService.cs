@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.Overseer.Entities;
@@ -6,10 +7,12 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
 {
     public interface ISystemModelService
     {
+        public event EventHandler<Guid> ServerUpdated;
+
         public void UpdateServerInfo(VirtualizationServer serverInfo);
 
-        public IEnumerable<Machine> GetMachines();
+        public IEnumerable<VirtualizationServer> GetServers();
 
-        public IEnumerable<ServerResourcesInfo> GetServersResources();
+        public Session GetSession(Guid sessionGuid);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +45,7 @@ namespace OneClickDesktop.Overseer
             services.AddSingleton<ISystemModelService, SystemModelService>();
             //singleton - rabbit receiver/sender(oddzielny watek)
             services.AddSingleton<IVirtualizationServerConnectionService, VirtualizationServerConnectionService>();
+            services.AddSingleton<IProcessService, ProcessService>();
             services.AddScoped<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
@@ -102,9 +104,9 @@ namespace OneClickDesktop.Overseer
             // add hardcoded test users to db on startup
             var testUsers = new List<User>
             {
-                new User() { Id = 1, Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = 2, Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = 3, Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
+                new User() { Id = Guid.NewGuid(), Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.NewGuid(), Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.NewGuid(), Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
             };
             context.Users.AddRange(testUsers);
             context.SaveChanges();

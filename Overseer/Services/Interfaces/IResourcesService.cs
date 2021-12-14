@@ -1,8 +1,5 @@
-﻿using OneClickDesktop.Api.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using OneClickDesktop.Api.Models;
 
 namespace OneClickDesktop.Overseer.Services.Interfaces
 {

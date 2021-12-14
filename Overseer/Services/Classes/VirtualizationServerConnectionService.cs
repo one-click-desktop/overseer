@@ -27,11 +27,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private readonly ISystemModelService modelService;
         private OverseerClient connection;
         
+        private BlockingCollection<(IRabbitMessage message, string queue)> requests  = new BlockingCollection<(IRabbitMessage message, string queue)>();
         private CancellationTokenSource tokenSrc = new CancellationTokenSource();
         private Thread senderThread = null;
+        private Thread modelRequestThread = null;
         private CancellationToken token;
-        
-        public BlockingCollection<IRabbitMessage> Requests { get; } = new BlockingCollection<IRabbitMessage>();
 
         public VirtualizationServerConnectionService(ISystemModelService modelService)
         {
@@ -53,8 +53,22 @@ namespace OneClickDesktop.Overseer.Services.Classes
             
             //Wystartuj wątek do wysyłania wiadomości
             token = tokenSrc.Token;
-            senderThread = new Thread(new ThreadStart(ConsumeMultithreadRequests));
+            senderThread = new Thread(ConsumeMultithreadRequests);
+            modelRequestThread = new Thread(RequestModelUpdate);
             senderThread.Start();
+        }
+
+        /// <summary>
+        /// Add request to message queue
+        /// </summary>
+        /// <param name="message">Message to send</param>
+        /// <param name="queue">Target RabbitMQ queue, null to end to all servers</param>
+        public void SendRequest(IRabbitMessage message, string queue)
+        {
+            if (message != null)
+            {
+                requests.Add((message, queue));
+            }
         }
         
         /// <summary>
@@ -80,11 +94,33 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 if (token.IsCancellationRequested)
                     return;
-                IRabbitMessage msg = Requests.Take();
+                var msg = requests.Take();
 
-                //logger.Warn("Wrong message to sent");
-
+                if (msg.queue != null)
+                {
+                    connection.SendToVirtServer(msg.queue, msg.message);
+                }
+                else
+                {
+                    connection.SendToAllVirtServers(msg.message);
+                }
+                
+                // imo lepiej przeciążyć ToString zamiast używać serializera do logowania wiadomości
                 logger.Info($"Message sent to virtualization servers {JsonSerializer.Serialize(msg)}");
+            }
+        }
+
+        private void RequestModelUpdate()
+        {
+            while (true)
+            {
+                if (token.IsCancellationRequested)
+                    return;
+                
+                SendRequest(new ModelReportMessage(null), null);
+                Thread.Sleep(Configuration.ModelUpdateWait);
+                
+                logger.Info($"Requesting model update from virtualization servers");
             }
         }
 
