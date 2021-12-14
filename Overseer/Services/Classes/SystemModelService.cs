@@ -42,8 +42,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             foreach (var (_, session) in server.Sessions)
             {
-                // this function will be added in new model library version
-                // model.UpdateOrAddSession(session);
+                model.UpdateOrAddSession(session);
             }
             // TODO: delete dead sessions
         }
