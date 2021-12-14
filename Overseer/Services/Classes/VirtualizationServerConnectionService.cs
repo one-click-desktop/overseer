@@ -56,6 +56,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             senderThread = new Thread(ConsumeMultithreadRequests);
             modelRequestThread = new Thread(RequestModelUpdate);
             senderThread.Start();
+            modelRequestThread.Start();
         }
 
         /// <summary>
@@ -80,8 +81,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             if (args.RabbitMessage.Type == ModelReportMessage.MessageTypeName)
             {
-                VirtualizationServer data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Message);
+                var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Message);
                 modelService.UpdateServerInfo(data);
+                logger.Info($"Updated server model");
             }
         }
         
@@ -99,14 +101,14 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 if (msg.queue != null)
                 {
                     connection.SendToVirtServer(msg.queue, msg.message);
+                    logger.Info($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
                 }
                 else
                 {
                     connection.SendToAllVirtServers(msg.message);
+                    // imo lepiej przeciążyć ToString zamiast używać serializera do logowania wiadomości
+                    logger.Info($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
                 }
-                
-                // imo lepiej przeciążyć ToString zamiast używać serializera do logowania wiadomości
-                logger.Info($"Message sent to virtualization servers {JsonSerializer.Serialize(msg)}");
             }
         }
 
@@ -118,9 +120,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     return;
                 
                 SendRequest(new ModelReportMessage(null), null);
-                Thread.Sleep(Configuration.ModelUpdateWait);
-                
                 logger.Info($"Requesting model update from virtualization servers");
+                
+                Thread.Sleep(Configuration.ModelUpdateWait);
             }
         }
 
@@ -130,6 +132,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 tokenSrc.Cancel();
                 senderThread?.Join();
+                modelRequestThread?.Join();
             }
 
             connection?.Dispose();

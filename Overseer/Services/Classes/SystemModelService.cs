@@ -45,6 +45,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 // this function will be added in new model library version
                 // model.UpdateOrAddSession(session);
             }
+            // TODO: delete dead sessions
         }
 
         public IEnumerable<VirtualizationServer> GetServers()
