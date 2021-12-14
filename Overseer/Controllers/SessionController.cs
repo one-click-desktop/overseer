@@ -30,7 +30,7 @@ namespace OneClickDesktop.Overseer.Controllers
         public override IActionResult DeleteSession([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
             sessionService.CancelSession(sessionId, RequestUser.Id.ToString());
-            return Ok("Sessions succefuly canceled");
+            return Ok("Sessions successfully canceled");
         }
 
         public override IActionResult GetSessionStatus([FromRoute(Name = "sessionId"), Required] string sessionId)
