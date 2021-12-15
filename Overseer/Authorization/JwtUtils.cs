@@ -13,7 +13,7 @@ namespace OneClickDesktop.Overseer.Authorization
     public interface IJwtUtils
     {
         public string GenerateJwtToken(User user);
-        public int? ValidateJwtToken(string token);
+        public Guid? ValidateJwtToken(string token);
     }
 
     public class JwtUtils : IJwtUtils
@@ -40,7 +40,7 @@ namespace OneClickDesktop.Overseer.Authorization
             return tokenHandler.WriteToken(token);
         }
 
-        public int? ValidateJwtToken(string token)
+        public Guid? ValidateJwtToken(string token)
         {
             if (token == null)
                 return null;
@@ -60,7 +60,7 @@ namespace OneClickDesktop.Overseer.Authorization
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var userId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
                 // return user id from JWT token if validation successful
                 return userId;

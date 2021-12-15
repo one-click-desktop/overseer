@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.BackendClasses.Model;
-using OneClickDesktop.BackendClasses.Model.States;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
 using OneClickDesktop.Overseer.Services.Interfaces;
-using SessionDTO = OneClickDesktop.Api.Models.SessionDTO;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
@@ -15,12 +12,13 @@ namespace OneClickDesktop.Overseer.Services.Classes
     {
         private readonly IVirtualizationServerConnectionService virtSrvConnection;
         private readonly ISystemModelService modelService;
+        private readonly ISessionProcessService sessionProcessService;
 
-        public SessionService(IVirtualizationServerConnectionService virtSrvConnection,
-                              ISystemModelService modelService)
+        public SessionService(ISystemModelService modelService,
+                              ISessionProcessService sessionProcessService)
         {
-            this.virtSrvConnection = virtSrvConnection;
             this.modelService = modelService;
+            this.sessionProcessService = sessionProcessService;
         }
 
         private Session FindSession(Guid sessionGuid, Guid userGuid)
@@ -28,12 +26,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var session = modelService.GetSession(sessionGuid);
             if (session == null || session.CorrelatedUser.Guid != userGuid)
             {
-                throw new ErrorHttpException("SessionDTO  not found", System.Net.HttpStatusCode.NotFound);
+                throw new ErrorHttpException("SessionDTO  not found", HttpStatusCode.NotFound);
             }
             return session;
         }
 
-        public SessionDTO AskForSession(Guid sessionGuid, Guid userGuid)
+        public SessionDTO AskAboutSession(Guid sessionGuid, Guid userGuid)
         {
             return CreateSessionDTO(FindSession(sessionGuid, userGuid));
         }
@@ -41,15 +39,19 @@ namespace OneClickDesktop.Overseer.Services.Classes
         public void CancelSession(Guid sessionGuid, Guid userGuid)
         {
             var session = FindSession(sessionGuid, userGuid);
-            StartSessionCancelProcess(session);
+            // TODO: cancel session
         }
 
-        public Guid RequestSession(MachineTypeDTO type, Guid userGuid)
+        public SessionDTO RequestSession(MachineTypeDTO type, Guid userGuid)
         {
-            var sessionGuid = Guid.NewGuid();
-            var session = new Session(new User(userGuid), ClassMapUtils.MapMachineTypeDTOToSessionType(type));
+            var sessionType = ClassMapUtils.MapMachineTypeDTOToSessionType(type);
+            if (modelService.TryFindSession(new User(userGuid), sessionType, out var session)) return CreateSessionDTO(session);
             
-            return sessionGuid;
+            // [WARNING] we may want to store users
+            session = modelService.CreateSession(new User(userGuid), sessionType);
+            sessionProcessService.StartSessionSearchProcess(session);
+
+            return CreateSessionDTO(session);
         }
 
         private SessionDTO CreateSessionDTO(Session session)
@@ -58,20 +60,15 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 Id = session.SessionGuid.ToString(),
                 Status = ClassMapUtils.MapSessionStateToDTO(session.SessionState),
-                Address = ClassMapUtils.MapAddressToDTO(session.CorrelatedMachine.IpAddress),
+                //Address = ClassMapUtils.MapAddressToDTO(session.CorrelatedMachine?.IpAddress),
+                // TODO: fix
+                Address = new IpAddressDTO()
+                {
+                    Address = "localhost",
+                    Port = 3389
+                },
                 Type = ClassMapUtils.MapSessionTypeToDTO(session.SessionType)
             };
-        }
-
-        private void StartSessionSearchProcess(Session session)
-        {
-            // TODO: add implementation
-        }
-
-        private void StartSessionCancelProcess(Session session)
-        {
-            session.SessionState = SessionState.Cancelled;
-            // TODO: add implementation
         }
     }
 }

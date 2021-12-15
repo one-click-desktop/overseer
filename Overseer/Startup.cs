@@ -45,7 +45,8 @@ namespace OneClickDesktop.Overseer
             services.AddSingleton<ISystemModelService, SystemModelService>();
             //singleton - rabbit receiver/sender(oddzielny watek)
             services.AddSingleton<IVirtualizationServerConnectionService, VirtualizationServerConnectionService>();
-            services.AddSingleton<IProcessService, ProcessService>();
+            services.AddSingleton<ISessionProcessService, SessionProcessService>();
+            services.AddSingleton<IMachineService, MachineService>();
             services.AddScoped<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
@@ -58,8 +59,6 @@ namespace OneClickDesktop.Overseer
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Overseer", Version = "v3.0.3" });
             });
-
-            //services.AddControllers(options => options.Filters.Add(new HttpResponseExceptionFilter()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,6 +68,7 @@ namespace OneClickDesktop.Overseer
 
             //Wymuszenie uruchomienia modułu do komunikajci z rabbitem
             app.ApplicationServices.GetService<IVirtualizationServerConnectionService>();
+            app.ApplicationServices.GetService<IMachineService>();
 
             if (env.IsDevelopment())
             {

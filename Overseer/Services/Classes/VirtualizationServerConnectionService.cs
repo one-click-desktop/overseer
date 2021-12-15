@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
-using System.Threading;
 using System.Text.Json;
+using System.Threading;
+using NLog;
 using OneClickDesktop.BackendClasses.Communication;
-using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.RabbitModule.Common.EventArgs;
@@ -23,15 +22,15 @@ namespace OneClickDesktop.Overseer.Services.Classes
     
     public class VirtualizationServerConnectionService: IVirtualizationServerConnectionService, IDisposable
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private readonly ISystemModelService modelService;
         private OverseerClient connection;
         
         private BlockingCollection<(IRabbitMessage message, string queue)> requests  = new BlockingCollection<(IRabbitMessage message, string queue)>();
         private CancellationTokenSource tokenSrc = new CancellationTokenSource();
+        private CancellationToken token;
         private Thread senderThread = null;
         private Thread modelRequestThread = null;
-        private CancellationToken token;
 
         public VirtualizationServerConnectionService(ISystemModelService modelService)
         {

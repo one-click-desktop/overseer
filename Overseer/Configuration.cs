@@ -7,6 +7,6 @@ namespace OneClickDesktop.Overseer
     public static class Configuration
     {
         public const string AppId = "Overseer";//To zmienne od instancji modułu oczywiście. Do testów ustawione na jakąś wartość.
-        public const int ModelUpdateWait = 60000; // Ile czekamy między prośbami o model
+        public const int ModelUpdateWait = 10000; // Ile czekamy między prośbami o model
     }
 }

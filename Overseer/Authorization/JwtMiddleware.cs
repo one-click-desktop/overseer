@@ -28,11 +28,11 @@ namespace OneClickDesktop.Overseer.Authorization
             try
             {
                 var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-                var userId = jwtUtils.ValidateJwtToken(token);
-                if (userId != null)
+                var userGuid = jwtUtils.ValidateJwtToken(token);
+                if (userGuid != null)
                 {
                     // attach user to context on successful jwt validation
-                    context.Items["User"] = userService.GetUserById(userId.Value);
+                    context.Items["User"] = userService.GetUserById(userGuid.Value);
                 }
             }
             catch (KeyNotFoundException)

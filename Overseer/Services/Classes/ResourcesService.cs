@@ -56,6 +56,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// </summary>
         public IEnumerable<MachineDTO> GetMachinesInfo()
         {
+            // TODO: should count downed and free machines as available
             return modelService.GetServers()
                                .SelectMany(CalculateFreeMachines)
                                .GroupBy(machine => machine.Type)
@@ -103,10 +104,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private static int CalculateAvailableMachinesForTemplate(ServerResources serverResources,
                                                                  TemplateResources templateResources)
         {
-            return Math.Min(serverResources.CpuCores / templateResources.CpuCores,
-                            Math.Min(serverResources.GpuCount / (templateResources.AttachGpu ? 1 : 0),
-                                     Math.Min(serverResources.Memory / templateResources.Memory,
-                                              serverResources.Storage / templateResources.Storage)));
+            // TODO: remove fake
+            serverResources.CpuCores = 4;
+            var res = Math.Min(serverResources.CpuCores / templateResources.CpuCores,
+                            Math.Min(serverResources.Memory / templateResources.Memory,
+                                     serverResources.Storage / templateResources.Storage));
+            return templateResources.AttachGpu ? Math.Min(res, serverResources.GpuCount) : res;
         }
 
         private static ResourcesDTO ConstructResourcesDTO(ServerResources totalResources, ServerResources freeResources)

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.States;
@@ -9,18 +10,26 @@ namespace OneClickDesktop.Overseer.Helpers
     {
         public static SessionStatusDTO MapSessionStateToDTO(SessionState state)
         {
-            // TODO
-            return SessionStatusDTO.Pending;
+            return state switch
+            {
+                SessionState.Pending => SessionStatusDTO.Pending,
+                SessionState.Running => SessionStatusDTO.Ready,
+                SessionState.Cancelled => SessionStatusDTO.Cancelled,
+                SessionState.WaitingForRemoval => SessionStatusDTO.Ready,
+                _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
+            };
         }
 
         public static IpAddressDTO MapAddressToDTO(IPAddress address)
         {
-            return new IpAddressDTO()
-            {
-                Address = address.ToString(),
-                // TODO: add port to model
-                Port = 1234
-            };
+            return address == null
+                ? null
+                : new IpAddressDTO()
+                {
+                    Address = address.ToString(),
+                    // TODO: add port to model
+                    Port = 1234
+                };
         }
 
         public static MachineTypeDTO MapSessionTypeToDTO(SessionType type)
@@ -44,9 +53,10 @@ namespace OneClickDesktop.Overseer.Helpers
                 Code = type.Type.GetHashCode()
             };
         }
-        
+
         public static SessionType MapMachineTypeDTOToSessionType(MachineTypeDTO machineType)
         {
+            // TODO: change to code after model change
             return new SessionType() { Type = machineType.Name };
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Options;
@@ -40,9 +41,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
             return new TokenDTO() { Token = jwtToken, Role = user.Role };
         }
 
-        public User GetUserById(int id)
+        public User GetUserById(Guid guid)
         {
-            var user = context.Users.Find(id);
+            var user = context.Users.Find(guid);
             if (user == null) throw new KeyNotFoundException("User not found");
             return user;
         }

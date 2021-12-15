@@ -31,20 +31,13 @@ namespace OneClickDesktop.Overseer.Controllers
 
         public override IActionResult GetSessionStatus([FromRoute(Name = "sessionId"), Required] string sessionId)
         {
-            var res = sessionService.AskForSession(Guid.Parse(sessionId), RequestUser.Id);
+            var res = sessionService.AskAboutSession(Guid.Parse(sessionId), RequestUser.Id);
             return Ok(res);
         }
 
         public override IActionResult GetSession([FromBody] MachineTypeDTO machineTypeDTO)
         {
-            var sessionId = sessionService.RequestSession(machineTypeDTO, RequestUser.Id);
-            return Ok(new SessionDTO()
-            {
-                Address = null,
-                Id = sessionId.ToString(),
-                Status = SessionStatusDTO.Pending,
-                Type = machineTypeDTO
-            });
+            return Ok(sessionService.RequestSession(machineTypeDTO, RequestUser.Id));
         }
     }
 }
