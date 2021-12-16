@@ -5,6 +5,7 @@ using System.Threading;
 using NLog;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.States;
+using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
@@ -49,7 +50,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     case SessionState.Cancelled:
                         model.DeleteSession(session.SessionGuid);
                         break;
-                    case SessionState.WaitingForRemoval when (session.CorrelatedMachine?.State ?? MachineState.TurnedOff) == MachineState.TurnedOff:
+                    case SessionState.WaitingForRemoval
+                        when (session.CorrelatedMachine?.State ?? MachineState.TurnedOff) == MachineState.TurnedOff:
                         model.DeleteSession(session.SessionGuid);
                         break;
                     default:
@@ -126,14 +128,18 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
         public Machine GetMachineForSession(Session session)
         {
-            Machine machine = null;
+            Machine machineForSession = null;
             try
             {
                 rwLock.AcquireReaderLock(Timeout.Infinite);
-                // TODO: add proper implemetation
-                machine = model.Servers.Values.FirstOrDefault()?.RunningMachines.Values.FirstOrDefault(
-                    m => m.State == MachineState.Free &&
-                         m.MachineType.Type == session.SessionType.Type);
+                var machineType = ClassMapUtils.MapSessionTypeToMachineType(session.SessionType);
+                // find free machine of type
+                machineForSession = model.Servers.Values
+                                         .SelectMany(
+                                             server => server.RunningMachines.Values.Where(
+                                                 machine => machine.MachineType.Equals(machineType)
+                                                            && machine.State == MachineState.Free)
+                                         ).FirstOrDefault();
             }
             catch (Exception e)
             {
@@ -144,7 +150,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 rwLock.ReleaseReaderLock();
             }
 
-            return machine;
+            return machineForSession;
         }
 
         public IEnumerable<(VirtualizationServer server, string domainName, MachineType machineType)>

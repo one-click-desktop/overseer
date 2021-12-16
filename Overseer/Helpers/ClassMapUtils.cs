@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.States;
@@ -57,6 +56,11 @@ namespace OneClickDesktop.Overseer.Helpers
         {
             // TODO: change to code after model change
             return new SessionType() { Type = machineType.Name };
+        }
+
+        public static MachineType MapSessionTypeToMachineType(SessionType sessionType)
+        {
+            return new MachineType() { Type = sessionType.Type };
         }
     }
 }
