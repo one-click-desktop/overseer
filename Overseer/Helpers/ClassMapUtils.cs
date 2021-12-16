@@ -20,15 +20,14 @@ namespace OneClickDesktop.Overseer.Helpers
             };
         }
 
-        public static IpAddressDTO MapAddressToDTO(IPAddress address)
+        public static IpAddressDTO MapAddressToDTO(MachineAddress? address)
         {
             return address == null
                 ? null
                 : new IpAddressDTO()
                 {
-                    Address = address.ToString(),
-                    // TODO: add port to model
-                    Port = 1234
+                    Address = address.Value.Address,
+                    Port = address.Value.Port
                 };
         }
 

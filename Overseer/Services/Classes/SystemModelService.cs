@@ -150,7 +150,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 server = model.Servers.Values.FirstOrDefault(server => server.Managable);
                 if (server == null || server.RunningMachines.Values.Any())
                     return new List<(VirtualizationServer server, string domainName, MachineType machineType)>();
-                domainName = $"{server?.ServerGuid}:{server.RunningMachines.Count}";
+                domainName = $"{server?.ServerGuid}-{server.RunningMachines.Count}";
                 machineType = new MachineType() { Type = server.TemplateResources.Keys.First() };
             }
             catch (Exception e)

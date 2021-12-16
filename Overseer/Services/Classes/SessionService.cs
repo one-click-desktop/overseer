@@ -60,13 +60,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 Id = session.SessionGuid.ToString(),
                 Status = ClassMapUtils.MapSessionStateToDTO(session.SessionState),
-                //Address = ClassMapUtils.MapAddressToDTO(session.CorrelatedMachine?.IpAddress),
-                // TODO: fix
-                Address = new IpAddressDTO()
-                {
-                    Address = "localhost",
-                    Port = 3389
-                },
+                Address = ClassMapUtils.MapAddressToDTO(session.CorrelatedMachine?.IpAddress),
                 Type = ClassMapUtils.MapSessionTypeToDTO(session.SessionType)
             };
         }
