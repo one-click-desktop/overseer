@@ -44,9 +44,19 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             foreach (var session in server.Sessions.Values)
             {
-                model.UpdateOrAddSession(session);
+                switch (session.SessionState)
+                {
+                    case SessionState.Cancelled:
+                        model.DeleteSession(session.SessionGuid);
+                        break;
+                    case SessionState.WaitingForRemoval when (session.CorrelatedMachine?.State ?? MachineState.TurnedOff) == MachineState.TurnedOff:
+                        model.DeleteSession(session.SessionGuid);
+                        break;
+                    default:
+                        model.UpdateOrAddSession(session);
+                        break;
+                }
             }
-            // TODO: delete dead sessions
         }
 
         public IEnumerable<VirtualizationServer> GetServers()
@@ -199,7 +209,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
             try
             {
                 rwLock.AcquireWriterLock(Timeout.Infinite);
-                // TODO: get session from model
                 session.SessionState = SessionState.Cancelled;
             }
             catch (Exception e)

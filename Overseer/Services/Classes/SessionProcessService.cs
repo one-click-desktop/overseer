@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -91,6 +90,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             if (machine == null)
             {
                 modelService.CancelSession(session);
+                // TODO: send servers info about session cancellation
                 return;
             }
 

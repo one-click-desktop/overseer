@@ -13,11 +13,11 @@ using OneClickDesktop.RabbitModule.Overseer;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
-    public class VirtualizationServerConnectionParameters
+    public struct VirtualizationServerConnectionParameters
     {
-        public string RabbitMQHostname;
-        public int RabbitMQPort;
-        public IReadOnlyDictionary<string, Type> MessageTypeMappings;
+        public string RabbitMQHostname { get; set; }
+        public int RabbitMQPort { get; set; }
+        public IReadOnlyDictionary<string, Type> MessageTypeMappings { get; set; }
     }
     
     public class VirtualizationServerConnectionService: IVirtualizationServerConnectionService, IDisposable
@@ -38,7 +38,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             
             this.modelService = modelService;
             //[TODO][CONFIG] Wynieść do konfiguracji!
-            VirtualizationServerConnectionParameters parameters = new VirtualizationServerConnectionParameters()
+            var parameters = new VirtualizationServerConnectionParameters()
             {
                 MessageTypeMappings = TypeMappings.OverseerReceiveMapping,
                 RabbitMQHostname = "localhost",
@@ -78,9 +78,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <param name="args"></param>
         private void ReceiveModelReport(object sender, MessageEventArgs args)
         {
-            if (args.RabbitMessage.Type == ModelReportMessage.MessageTypeName)
+            if (args.RabbitMessage.MessageType == ModelReportMessage.MessageTypeName)
             {
-                var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Message);
+                var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.MessageBody);
                 modelService.UpdateServerInfo(data);
                 logger.Info($"Updated server model");
             }
@@ -100,13 +100,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 if (msg.queue != null)
                 {
                     connection.SendToVirtServer(msg.queue, msg.message);
-                    logger.Info($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
+                    logger.Debug($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
                 }
                 else
                 {
                     connection.SendToAllVirtServers(msg.message);
-                    // imo lepiej przeciążyć ToString zamiast używać serializera do logowania wiadomości
-                    logger.Info($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
+                    logger.Debug($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
                 }
             }
         }

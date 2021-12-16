@@ -27,13 +27,13 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var virtualizationServers = servers.ToList();
             var (totalServerResources, freeServerResources) = virtualizationServers
                                                               .Select(server =>
-                                                                          (server.TotalServerResources,
-                                                                           server.FreeServerResources)
+                                                                          (server.TotalResources,
+                                                                           server.FreeResources)
                                                               )
                                                               .Aggregate((a1, a2) =>
-                                                                             (a1.TotalServerResources + a2.TotalServerResources,
-                                                                              a1.FreeServerResources +
-                                                                              a2.FreeServerResources)
+                                                                             (a1.TotalResources + a2.TotalResources,
+                                                                              a1.FreeResources +
+                                                                              a2.FreeResources)
                                                               );
             return new TotalResourcesDTO()
             {
@@ -42,7 +42,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 Servers = virtualizationServers.Select(server => new ServerDTO()
                 {
                     Name = server.ServerGuid.ToString(),
-                    Resources = ConstructResourcesDTO(server.TotalServerResources, server.FreeServerResources),
+                    Resources = ConstructResourcesDTO(server.TotalResources, server.FreeResources),
                     Free = CalculateFreeMachines(server),
                     Running = GetRunningMachines(server),
                     // TODO: we need to change this in DTO, as we don't store server address
@@ -56,9 +56,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// </summary>
         public IEnumerable<MachineDTO> GetMachinesInfo()
         {
-            // TODO: should count downed and free machines as available
             return modelService.GetServers()
-                               .SelectMany(CalculateFreeMachines)
+                               .SelectMany(server => CalculateFreeMachines(server, true))
                                .GroupBy(machine => machine.Type)
                                .Select(group => new MachineDTO()
                                {
@@ -70,9 +69,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <summary>
         /// Calculate amount of machines that can be created on server by type
         /// </summary>
-        private static List<MachineDTO> CalculateFreeMachines(VirtualizationServer server)
+        private static List<MachineDTO> CalculateFreeMachines(VirtualizationServer server, bool useAvailable = false)
         {
-            var freeResources = server.FreeServerResources;
+            var freeResources = useAvailable ? server.AvailableResources : server.FreeResources;
 
             return server.TemplateResources.Select(pair =>
             {
@@ -80,7 +79,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 return new MachineDTO()
                 {
                     Type = ClassMapUtils.MapMachineTypeToDTO(new MachineType() { Type = type }),
-                    Amount = CalculateAvailableMachinesForTemplate(freeResources, templateResources)
+                    Amount = CalculateFreeMachinesForTemplate(freeResources, templateResources)
                 };
             }).ToList();
         }
@@ -101,14 +100,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <summary>
         /// Calculates amount of machines that can be created from template resources
         /// </summary>
-        private static int CalculateAvailableMachinesForTemplate(ServerResources serverResources,
-                                                                 TemplateResources templateResources)
+        private static int CalculateFreeMachinesForTemplate(ServerResources serverResources,
+                                                            TemplateResources templateResources)
         {
-            // TODO: remove fake
-            serverResources.CpuCores = 4;
             var res = Math.Min(serverResources.CpuCores / templateResources.CpuCores,
-                            Math.Min(serverResources.Memory / templateResources.Memory,
-                                     serverResources.Storage / templateResources.Storage));
+                               Math.Min(serverResources.Memory / templateResources.Memory,
+                                        serverResources.Storage / templateResources.Storage));
             return templateResources.AttachGpu ? Math.Min(res, serverResources.GpuCount) : res;
         }
 
