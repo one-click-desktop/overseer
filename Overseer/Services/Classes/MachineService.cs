@@ -22,15 +22,15 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private void StartMachineIfNeeded(object sender, Guid serverGuid)
         {
             var domains = modelService.GetDomainsForStartup();
-            foreach (var (server, domainName, machineType) in domains)
+            foreach (var domain in domains)
             {
                 connectionService.SendRequest(
                     new DomainStartupMessage(new DomainStartupRDTO()
                     {
-                        DomainName = domainName,
-                        DomainType = machineType
+                        DomainName = domain.DomainName,
+                        DomainType = domain.MachineType
                     }),
-                    server.Queue
+                    domain.Server.Queue
                 );
             }
         }

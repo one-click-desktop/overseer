@@ -1,12 +1,16 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using NLog;
 using OneClickDesktop.BackendClasses.Model;
+using OneClickDesktop.BackendClasses.Model.Resources;
 using OneClickDesktop.BackendClasses.Model.States;
+using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Services.Interfaces;
+using User = OneClickDesktop.BackendClasses.Model.User;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
@@ -153,21 +157,58 @@ namespace OneClickDesktop.Overseer.Services.Classes
             return machineForSession;
         }
 
-        public IEnumerable<(VirtualizationServer server, string domainName, MachineType machineType)>
+        public IEnumerable<DomainStartup>
             GetDomainsForStartup()
         {
-            VirtualizationServer server = null;
-            string domainName = null;
-            MachineType machineType = null;
+            var domains = new List<DomainStartup>();
             try
             {
                 rwLock.AcquireReaderLock(Timeout.Infinite);
-                // TODO: add proper implementation
-                server = model.Servers.Values.FirstOrDefault(server => server.Managable);
-                if (server == null || server.RunningMachines.Values.Any())
-                    return new List<(VirtualizationServer server, string domainName, MachineType machineType)>();
-                domainName = $"{server?.ServerGuid}-{server.RunningMachines.Count}";
-                machineType = new MachineType() { Type = server.TemplateResources.Keys.First() };
+
+                // find all machine types
+                var machineTypes = model.Servers.Values
+                                        .SelectMany(server => server.TemplateResources.Keys)
+                                        .Select(key => new MachineType() { Type = key })
+                                        .Distinct();
+                // find machine types with machines
+                var machinesStarted = model.Servers.Values
+                                           .SelectMany(server => server.RunningMachines.Values)
+                                           .Where(machine => Constants.State.MachineAvailable.Contains(machine.State))
+                                           .Select(machine => machine.MachineType)
+                                           .Distinct();
+                // machine types with no available machines
+                var machinesToStart = machineTypes.Except(machinesStarted);
+
+                // free server resources, updated as machine startups are processed
+                var serverResources = new Dictionary<Guid, ServerResources>(model.Servers.Values
+                                                                                .Select(
+                                                                                    server => (
+                                                                                        server, server.FreeResources))
+                                                                                .Select(
+                                                                                    pair =>
+                                                                                        new KeyValuePair<Guid,
+                                                                                            ServerResources>(
+                                                                                            pair.server.ServerGuid,
+                                                                                            new ServerResources(
+                                                                                                pair.FreeResources,
+                                                                                                pair.FreeResources
+                                                                                                    .GpuIds)))
+                );
+
+                // for each machine type select server and generate domain name
+                foreach (var machineType in machinesToStart)
+                {
+                    var server = model.Servers.Values
+                                      .Where(server => server.TemplateResources.ContainsKey(machineType.Type))
+                                      .OrderByDescending(
+                                          server => CanCreateMachines(server, machineType, serverResources))
+                                      .FirstOrDefault();
+
+                    if (server == null) continue;
+
+                    DecreaseServerResources(serverResources, server, machineType);
+                    domains.Add(new DomainStartup(server, GenerateMachineDomainName(server), machineType));
+                }
             }
             catch (Exception e)
             {
@@ -178,10 +219,32 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 rwLock.ReleaseReaderLock();
             }
 
-            return new List<(VirtualizationServer server, string domainName, MachineType machineType)>()
-            {
-                (server, domainName, machineType)
-            };
+            return domains;
+        }
+
+        private int CanCreateMachines(VirtualizationServer server, MachineType type,
+                                      Dictionary<Guid, ServerResources> serverResourcesMap)
+        {
+            var template = server.TemplateResources[type.Type];
+            var resources = serverResourcesMap[server.ServerGuid];
+
+            var count = Math.Min(resources.CpuCores / template.CpuCores,
+                                 Math.Min(resources.Memory / template.Memory,
+                                          resources.Storage / template.Storage));
+            return template.AttachGpu ? Math.Min(count, resources.GpuCount) : count;
+        }
+
+        private void DecreaseServerResources(Dictionary<Guid, ServerResources> serverResourcesMap,
+                                             VirtualizationServer server, MachineType type)
+        {
+            // update map: decrease resources needed to create this machine
+        }
+
+        private string GenerateMachineDomainName(VirtualizationServer server)
+        {
+            var lastDomainNumber = server.RunningMachines.Values
+                                         .Select(machine => int.Parse(machine.Name.Substring(37))).Max();
+            return $"{server.ServerGuid.ToString()}-{lastDomainNumber + 1}";
         }
 
         public Machine GetMachine(Guid serverGuid, string machineName)

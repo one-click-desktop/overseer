@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using OneClickDesktop.BackendClasses.Model;
+using OneClickDesktop.Overseer.Entities;
+using User = OneClickDesktop.BackendClasses.Model.User;
 
 namespace OneClickDesktop.Overseer.Services.Interfaces
 {
@@ -20,7 +22,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
 
         public Machine GetMachineForSession(Session session);
 
-        public IEnumerable<(VirtualizationServer server, string domainName, MachineType machineType)>
+        public IEnumerable<DomainStartup>
             GetDomainsForStartup();
 
         public Machine GetMachine(Guid serverGuid, string machineName);

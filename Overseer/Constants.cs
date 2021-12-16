@@ -13,6 +13,12 @@ namespace OneClickDesktop.Overseer
                 SessionState.Running,
                 SessionState.WaitingForRemoval
             };
+
+            public static readonly HashSet<MachineState> MachineAvailable = new HashSet<MachineState>()
+            {
+                MachineState.Booting,
+                MachineState.Free
+            };
         }
     }
 }
