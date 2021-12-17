@@ -107,6 +107,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     connection.SendToAllVirtServers(msg.message);
                     logger.Debug($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
                 }
+                logger.Info($"Send message {msg.message.MessageType}");
             }
         }
 
