@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
-using NLog;
+using Microsoft.Extensions.Logging;
 using OneClickDesktop.BackendClasses.Communication;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
@@ -22,7 +22,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
     
     public class VirtualizationServerConnectionService: IVirtualizationServerConnectionService, IDisposable
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger<VirtualizationServerConnectionService> logger;
         private readonly ISystemModelService modelService;
         private OverseerClient connection;
         
@@ -32,9 +32,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private Thread senderThread = null;
         private Thread modelRequestThread = null;
 
-        public VirtualizationServerConnectionService(ISystemModelService modelService)
+        public VirtualizationServerConnectionService(ISystemModelService modelService, ILogger<VirtualizationServerConnectionService> logger)
         {
-            logger.Info("Starting VirtualizationServerConnectionService");
+            this.logger = logger;
+
+            this.logger.LogInformation("Starting VirtualizationServerConnectionService");
             
             this.modelService = modelService;
             //[TODO][CONFIG] Wynieść do konfiguracji!
@@ -82,7 +84,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.MessageBody);
                 modelService.UpdateServerInfo(data);
-                logger.Info($"Updated server model");
+                logger.LogInformation($"Updated server model");
             }
         }
         
@@ -100,14 +102,14 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 if (msg.queue != null)
                 {
                     connection.SendToVirtServer(msg.queue, msg.message);
-                    logger.Debug($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
+                    logger.LogDebug($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
                 }
                 else
                 {
                     connection.SendToAllVirtServers(msg.message);
-                    logger.Debug($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
+                    logger.LogDebug($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
                 }
-                logger.Info($"Send message {msg.message.MessageType}");
+                logger.LogInformation($"Send message {msg.message.MessageType}");
             }
         }
 
@@ -119,7 +121,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     return;
                 
                 SendRequest(new ModelReportMessage(null), null);
-                logger.Info($"Requesting model update from virtualization servers");
+                logger.LogInformation($"Requesting model update from virtualization servers");
                 
                 Thread.Sleep(Configuration.ModelUpdateWait);
             }

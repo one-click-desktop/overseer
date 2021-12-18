@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using NLog;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.Resources;
@@ -16,7 +17,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class SystemModelService : ISystemModelService
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger<SystemModelService> logger;
+
+        public SystemModelService(ILogger<SystemModelService> logger)
+        {
+            this.logger = logger;
+        }
 
         private SystemModel model = new SystemModel();
         private ReaderWriterLock rwLock = new ReaderWriterLock();
@@ -37,7 +43,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on updating Server information in model");
+                logger.LogWarning(e, "Error on updating Server information in model");
             }
             finally
             {
@@ -75,7 +81,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on reading servers resources from model");
+                logger.LogWarning(e, "Error on reading servers resources from model");
             }
             finally
             {
@@ -95,7 +101,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on creating session in model");
+                logger.LogWarning(e, "Error on creating session in model");
             }
             finally
             {
@@ -120,7 +126,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on looking for session in model");
+                logger.LogWarning(e, "Error on looking for session in model");
             }
             finally
             {
@@ -147,7 +153,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on reading machine details from model");
+                logger.LogWarning(e, "Error on reading machine details from model");
             }
             finally
             {
@@ -214,7 +220,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on getting domains for startup from model");
+                logger.LogWarning(e, "Error on getting domains for startup from model");
             }
             finally
             {
@@ -276,7 +282,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on reading looking for server machine in model");
+                logger.LogWarning(e, "Error on reading looking for server machine in model");
             }
             finally
             {
@@ -295,7 +301,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on changing session state in model");
+                logger.LogWarning(e, "Error on changing session state in model");
             }
             finally
             {
@@ -313,7 +319,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
             catch (Exception e)
             {
-                logger.Warn(e, "Error on reading session details from model");
+                logger.LogWarning(e, "Error on reading session details from model");
             }
             finally
             {
