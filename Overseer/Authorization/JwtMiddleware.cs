@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
+using OneClickDesktop.Overseer.Helpers.Settings;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;

@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OneClickDesktop.BackendClasses.Communication;
+using OneClickDesktop.Overseer.Helpers.Settings;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.RabbitModule.Common.EventArgs;
@@ -24,6 +26,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
     {
         private readonly ILogger<VirtualizationServerConnectionService> logger;
         private readonly ISystemModelService modelService;
+        private readonly IOptions<OneClickDesktopSettings> conf;
         private OverseerClient connection;
         
         private BlockingCollection<(IRabbitMessage message, string queue)> requests  = new BlockingCollection<(IRabbitMessage message, string queue)>();
@@ -32,19 +35,22 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private Thread senderThread = null;
         private Thread modelRequestThread = null;
 
-        public VirtualizationServerConnectionService(ISystemModelService modelService, ILogger<VirtualizationServerConnectionService> logger)
+        public VirtualizationServerConnectionService(
+            ISystemModelService modelService,
+            ILogger<VirtualizationServerConnectionService> logger,
+            IOptions<OneClickDesktopSettings> ocdConfiguration)
         {
             this.logger = logger;
+            conf = ocdConfiguration;
 
             this.logger.LogInformation("Starting VirtualizationServerConnectionService");
             
             this.modelService = modelService;
-            //[TODO][CONFIG] Wynieść do konfiguracji!
             var parameters = new VirtualizationServerConnectionParameters()
             {
                 MessageTypeMappings = TypeMappings.OverseerReceiveMapping,
-                RabbitMQHostname = "localhost",
-                RabbitMQPort = 5672
+                RabbitMQHostname = conf.Value.RabbitMQHostname,
+                RabbitMQPort = conf.Value.RabbitMQPort
             };
             connection = new OverseerClient(parameters.RabbitMQHostname, parameters.RabbitMQPort,
                 parameters.MessageTypeMappings);
@@ -101,6 +107,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
                 if (msg.queue != null)
                 {
+                    msg.message.SenderIdentifier = conf.Value.OverseerId;
                     connection.SendToVirtServer(msg.queue, msg.message);
                     logger.LogDebug($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
                 }
@@ -123,7 +130,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 SendRequest(new ModelReportMessage(null), null);
                 logger.LogInformation($"Requesting model update from virtualization servers");
                 
-                Thread.Sleep(Configuration.ModelUpdateWait);
+                Thread.Sleep(conf.Value.SessionWaitingTimeout * 60000);//from minutes to miliseconds
             }
         }
 

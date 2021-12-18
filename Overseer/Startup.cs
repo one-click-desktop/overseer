@@ -12,8 +12,8 @@ using OneClickDesktop.Overseer.Services.Classes;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.Api.Models;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text.Json.Serialization;
+using OneClickDesktop.Overseer.Helpers.Settings;
 
 namespace OneClickDesktop.Overseer
 {
@@ -39,6 +39,7 @@ namespace OneClickDesktop.Overseer
 
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
+            services.Configure<OneClickDesktopSettings>(Configuration.GetSection("OneClickDesktop"));
             
             //singleton - model (zapytania publiczne muszą byc thread-safe!!!)
             services.AddSingleton<ISystemModelService, SystemModelService>();

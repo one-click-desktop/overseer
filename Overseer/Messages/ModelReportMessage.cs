@@ -5,7 +5,7 @@ namespace OneClickDesktop.Overseer.Messages
 {
     public class ModelReportMessage: ModelReportTemplate, IRabbitMessage
     {
-        public string SenderIdentifier { get; set; } = Configuration.AppId;
+        public string SenderIdentifier { get; set; }
         public string Type { get; set; } = MessageTypeName;
         public object Body { get; set; }
 

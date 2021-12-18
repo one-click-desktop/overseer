@@ -1,6 +1,6 @@
 
 
-namespace OneClickDesktop.Overseer.Helpers
+namespace OneClickDesktop.Overseer.Helpers.Settings
 {
     public class JwtSettings
     {
