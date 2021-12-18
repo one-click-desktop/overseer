@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using NLog;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.Resources;
 using OneClickDesktop.BackendClasses.Model.States;

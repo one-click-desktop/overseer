@@ -80,9 +80,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <param name="args"></param>
         private void ReceiveModelReport(object sender, MessageEventArgs args)
         {
-            if (args.RabbitMessage.MessageType == ModelReportMessage.MessageTypeName)
+            if (args.RabbitMessage.Type == ModelReportMessage.MessageTypeName)
             {
-                var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.MessageBody);
+                var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Body);
                 modelService.UpdateServerInfo(data);
                 logger.LogInformation($"Updated server model");
             }
@@ -109,7 +109,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     connection.SendToAllVirtServers(msg.message);
                     logger.LogDebug($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
                 }
-                logger.LogInformation($"Send message {msg.message.MessageType}");
+                logger.LogInformation($"Send message {msg.message.Type}");
             }
         }
 

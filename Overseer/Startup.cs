@@ -14,7 +14,6 @@ using OneClickDesktop.Api.Models;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
-using NLog.Fluent;
 
 namespace OneClickDesktop.Overseer
 {

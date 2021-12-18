@@ -6,13 +6,13 @@ namespace OneClickDesktop.Overseer.Messages
 {
     public class DomainShutdownMessage: DomainShutdownTemplate, IRabbitMessage
     {
-        public string AppId { get; set; } = Configuration.AppId;
+        public string SenderIdentifier { get; set; } = Configuration.AppId;
         public string Type { get; set; } = MessageTypeName;
-        public object Message { get; set; }
-
+        public object Body { get; set; }
+        
         public DomainShutdownMessage(DomainShutdownRDTO data)
         {
-            Message = data;
+            Body = data;
         }
     }
 }

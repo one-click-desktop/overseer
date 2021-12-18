@@ -5,13 +5,13 @@ namespace OneClickDesktop.Overseer.Messages
 {
     public class ModelReportMessage: ModelReportTemplate, IRabbitMessage
     {
-        public string AppId { get; set; } = Configuration.AppId;
+        public string SenderIdentifier { get; set; } = Configuration.AppId;
         public string Type { get; set; } = MessageTypeName;
-        public object Message { get; set; }
+        public object Body { get; set; }
 
         public ModelReportMessage(BackendClasses.Model.VirtualizationServer model)
         {
-            Message = model;
+            Body = model;
         }
     }
 }
