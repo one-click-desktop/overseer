@@ -130,7 +130,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 SendRequest(new ModelReportMessage(null), null);
                 logger.LogInformation($"Requesting model update from virtualization servers");
                 
-                Thread.Sleep(conf.Value.SessionWaitingTimeout * 60000);//from minutes to miliseconds
+                Thread.Sleep(conf.Value.ModelUpdateInterval * 1000);//from seconds to miliseconds
             }
         }
 
