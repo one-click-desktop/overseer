@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Options;
@@ -10,6 +8,7 @@ using OneClickDesktop.Overseer.Authorization;
 using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
+using OneClickDesktop.Overseer.Helpers.Settings;
 using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
@@ -43,9 +42,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
             return new TokenDTO() { Token = jwtToken, Role = user.Role };
         }
 
-        public User GetUserById(int id)
+        public User GetUserById(Guid guid)
         {
-            var user = context.Users.Find(id);
+            var user = context.Users.Find(guid);
             if (user == null) throw new KeyNotFoundException("User not found");
             return user;
         }

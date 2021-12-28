@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.Api.Models;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using OneClickDesktop.Overseer.Helpers.Settings;
 
 namespace OneClickDesktop.Overseer
 {
@@ -37,25 +39,36 @@ namespace OneClickDesktop.Overseer
 
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
-
+            services.Configure<OneClickDesktopSettings>(Configuration.GetSection("OneClickDesktop"));
+            
+            //singleton - model (zapytania publiczne muszą byc thread-safe!!!)
+            services.AddSingleton<ISystemModelService, SystemModelService>();
+            //singleton - rabbit receiver/sender(oddzielny watek)
+            services.AddSingleton<IVirtualizationServerConnectionService, VirtualizationServerConnectionService>();
+            services.AddSingleton<ISessionProcessService, SessionProcessService>();
+            services.AddSingleton<IMachineService, MachineService>();
             services.AddScoped<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<ISessionService, SessionService>();
+            
+            //var test = new VirtualizationServerConnectionService(new SystemModelService());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Overseer", Version = "v3.0.3" });
             });
-
-            //services.AddControllers(options => options.Filters.Add(new HttpResponseExceptionFilter()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
         {
             createTestUsers(context);
+
+            //Wymuszenie uruchomienia modułu do komunikajci z rabbitem
+            app.ApplicationServices.GetService<IVirtualizationServerConnectionService>();
+            app.ApplicationServices.GetService<IMachineService>();
 
             if (env.IsDevelopment())
             {
@@ -91,9 +104,10 @@ namespace OneClickDesktop.Overseer
             // add hardcoded test users to db on startup
             var testUsers = new List<User>
             {
-                new User() { Id = 1, Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = 2, Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = 3, Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
+                new User() { Id = Guid.NewGuid(), Username = "vagrant", Password = "vagrant", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.NewGuid(), Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.NewGuid(), Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.NewGuid(), Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
             };
             context.Users.AddRange(testUsers);
             context.SaveChanges();

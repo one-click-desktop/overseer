@@ -1,90 +1,132 @@
-﻿
-
-using OneClickDesktop.Api.Models;
-using OneClickDesktop.Overseer.Services.Interfaces;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using OneClickDesktop.Api.Models;
+using OneClickDesktop.BackendClasses.Model;
+using OneClickDesktop.BackendClasses.Model.Resources;
+using OneClickDesktop.Overseer.Helpers;
+using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class ResourcesService : IResourcesService
     {
-        private List<MachineDTO> fakeMachines;
-        private TotalResourcesDTO fakeTotalResources;
+        private readonly ISystemModelService modelService;
 
-
-
-        public ResourcesService()
+        public ResourcesService(ISystemModelService modelService)
         {
-            MachineTypeDTO cpu = new MachineTypeDTO()
-            {
-                Code = 1,
-                Name = "cpu"
-            };
-            MachineTypeDTO gpu = new MachineTypeDTO()
-            {
-                Code = 1,
-                Name = "gpu"
-            };
-
-            fakeMachines = new List<MachineDTO>();
-            fakeMachines.Add(new MachineDTO()
-            {
-                Amount = 2,
-                Type = cpu
-            });
-            fakeMachines.Add(new MachineDTO()
-            {
-                Amount = 0,
-                Type = gpu
-            });
-
-            fakeTotalResources = new TotalResourcesDTO();
-            fakeTotalResources.Servers = new List<ServerDTO>()
-            {
-                new ServerDTO()
-                {
-                    Address = new IpAddressDTO()
-                    {
-                        Address = "10.0.10.99",
-                        Port = 3389
-                    },
-                    Name = "fakeServer1",
-                    Free = new List<MachineDTO>()
-                    {
-                        new MachineDTO() { Amount = 2, Type = cpu },
-                        new MachineDTO() { Amount = 0, Type = gpu },
-                    },
-                    Running = new List<MachineDTO>()
-                    {
-                        new MachineDTO() { Amount = 0, Type = cpu },
-                        new MachineDTO() { Amount = 1, Type = gpu },
-                    },
-                    Resources = new ResourcesDTO()
-                    {
-                        Cpu = new ResourceDTO() { Total = 8, Free = 4},
-                        Gpu = new ResourceDTO() { Total = 1, Free = 0},
-                        Memory = new ResourceDTO() { Total = 8192, Free = 4096 },
-                        Storage = new ResourceDTO() { Total = 500, Free = 450 }
-                    }
-                }
-            };
-            fakeTotalResources.Total = new ResourcesDTO()
-            {
-                Cpu = new ResourceDTO() { Total = 8, Free = 4 },
-                Gpu = new ResourceDTO() { Total = 1, Free = 0 },
-                Memory = new ResourceDTO() { Total = 8192, Free = 4096 },
-                Storage = new ResourceDTO() { Total = 500, Free = 450 }
-            };
+            this.modelService = modelService;
         }
 
+        /// <summary>
+        /// Get information about total resources and each server resources
+        /// </summary>
         public TotalResourcesDTO GetAllResources()
         {
-            return fakeTotalResources;
+            var servers = modelService.GetServers();
+            var virtualizationServers = servers.ToList();
+            var (totalServerResources, freeServerResources) = virtualizationServers
+                                                              .Select(server =>
+                                                                          (server.TotalResources,
+                                                                           server.FreeResources)
+                                                              )
+                                                              .Aggregate((a1, a2) =>
+                                                                             (a1.TotalResources + a2.TotalResources,
+                                                                              a1.FreeResources +
+                                                                              a2.FreeResources)
+                                                              );
+            return new TotalResourcesDTO()
+            {
+                Total = ConstructResourcesDTO(totalServerResources,
+                                              freeServerResources),
+                Servers = virtualizationServers.Select(server => new ServerDTO()
+                {
+                    Name = server.ServerGuid.ToString(),
+                    Resources = ConstructResourcesDTO(server.TotalResources, server.FreeResources),
+                    Free = CalculateFreeMachines(server),
+                    Running = GetRunningMachines(server),
+                    // TODO: we need to change this in DTO, as we don't store server address
+                    Address = null
+                }).ToList()
+            };
         }
 
+        /// <summary>
+        /// Get amount of available machines by type
+        /// </summary>
         public IEnumerable<MachineDTO> GetMachinesInfo()
         {
-            return fakeMachines;
+            return modelService.GetServers()
+                               .SelectMany(server => CalculateFreeMachines(server, true))
+                               .GroupBy(machine => machine.Type)
+                               .Select(group => new MachineDTO()
+                               {
+                                   Type = group.Key,
+                                   Amount = group.Sum(machine => machine.Amount)
+                               });
+        }
+
+        /// <summary>
+        /// Calculate amount of machines that can be created on server by type
+        /// </summary>
+        private static List<MachineDTO> CalculateFreeMachines(VirtualizationServer server, bool useAvailable = false)
+        {
+            var freeResources = useAvailable ? server.AvailableResources : server.FreeResources;
+
+            return server.TemplateResources.Select(pair =>
+            {
+                var (type, templateResources) = pair;
+                return new MachineDTO()
+                {
+                    Type = ClassMapUtils.MapMachineTypeToDTO(new MachineType() { Type = type }),
+                    Amount = CalculateFreeMachinesForTemplate(freeResources, templateResources)
+                };
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Get list of machines running on server by machine type
+        /// </summary>
+        private static List<MachineDTO> GetRunningMachines(VirtualizationServer server)
+        {
+            return server.RunningMachines.Values.GroupBy(machine => machine.MachineType)
+                         .Select(group => new MachineDTO()
+                         {
+                             Amount = group.Count(),
+                             Type = ClassMapUtils.MapMachineTypeToDTO(group.Key)
+                         }).ToList();
+        }
+
+        /// <summary>
+        /// Calculates amount of machines that can be created from template resources
+        /// </summary>
+        private static int CalculateFreeMachinesForTemplate(ServerResources serverResources,
+                                                            TemplateResources templateResources)
+        {
+            var res = Math.Min(serverResources.CpuCores / templateResources.CpuCores,
+                               Math.Min(serverResources.Memory / templateResources.Memory,
+                                        serverResources.Storage / templateResources.Storage));
+            return templateResources.AttachGpu ? Math.Min(res, serverResources.GpuCount) : res;
+        }
+
+        private static ResourcesDTO ConstructResourcesDTO(ServerResources totalResources, ServerResources freeResources)
+        {
+            return new ResourcesDTO()
+            {
+                Cpu = ConstructResourceDTO(totalResources.CpuCores, freeResources.CpuCores),
+                Gpu = ConstructResourceDTO(totalResources.GpuCount, freeResources.GpuCount),
+                Memory = ConstructResourceDTO(totalResources.Memory, freeResources.Memory),
+                Storage = ConstructResourceDTO(totalResources.Storage, freeResources.Storage),
+            };
+        }
+
+        private static ResourceDTO ConstructResourceDTO(int total, int free)
+        {
+            return new ResourceDTO()
+            {
+                Free = free,
+                Total = total
+            };
         }
     }
 }

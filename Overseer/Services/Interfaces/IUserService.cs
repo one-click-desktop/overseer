@@ -1,4 +1,5 @@
 ﻿
+using System;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.Overseer.Entities;
 
@@ -16,6 +17,6 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// <returns>Token przy prawidłowych danych. Null wpw.</returns>
         TokenDTO Login(LoginDTO loginData);
 
-        User GetUserById(int id);
+        User GetUserById(Guid guid);
     }
 }

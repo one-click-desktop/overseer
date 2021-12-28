@@ -45,6 +45,7 @@ namespace OneClickDesktop.Overseer.Helpers
                 response.StatusCode = res.Code;
                 var result = JsonSerializer.Serialize(res);
                 await response.WriteAsync(result);
+                throw;
             }
         }
     }

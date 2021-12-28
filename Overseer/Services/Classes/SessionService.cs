@@ -1,53 +1,68 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Net;
 using OneClickDesktop.Api.Models;
+using OneClickDesktop.BackendClasses.Model;
+using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
 using OneClickDesktop.Overseer.Services.Interfaces;
-
-using SessionDTO  = OneClickDesktop.Api.Models.SessionDTO ;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class SessionService : ISessionService
     {
-        private static Dictionary<string, (SessionDTO  ses, string user)> fakeSessionList = new Dictionary<string, (SessionDTO  ses, string user)>();
+        private readonly IVirtualizationServerConnectionService virtSrvConnection;
+        private readonly ISystemModelService modelService;
+        private readonly ISessionProcessService sessionProcessService;
 
-        private SessionDTO  FindSession(string sessionGuid, string userGuid)
+        public SessionService(ISystemModelService modelService,
+                              ISessionProcessService sessionProcessService)
         {
-            if (!fakeSessionList.TryGetValue(sessionGuid, out (SessionDTO  ses, string user) session) || session.user != userGuid)
-                throw new ErrorHttpException("SessionDTO  not found", System.Net.HttpStatusCode.NotFound);
-            return session.ses;
+            this.modelService = modelService;
+            this.sessionProcessService = sessionProcessService;
         }
 
-        public SessionDTO  AskForSession(string sessionGuid, string userGuid)
+        private Session FindSession(Guid sessionGuid, Guid userGuid)
         {
-            return FindSession(sessionGuid, userGuid);
-        }
-
-        public void CancelSession(string sessionGuid, string userGuid)
-        {
-            SessionDTO  session = FindSession(sessionGuid, userGuid);
-
-            fakeSessionList.Remove(session.Id);
-        }
-
-        public string RequestSession(MachineTypeDTO  type, string userGuid)
-        {
-            //TODO: Dodac validace czy typ sesji jest dopuszczalny w systemie
-            string sessionGuid = Guid.NewGuid().ToString();
-            fakeSessionList.Add(sessionGuid, (new SessionDTO ()
+            var session = modelService.GetSession(sessionGuid);
+            if (session == null || session.CorrelatedUser.Guid != userGuid)
             {
-                Address = new IpAddressDTO()
-                {
-                    Address = "1.2.3.4",
-                    Port = 12345
-                },
-                Id = sessionGuid,
-                Status = SessionStatusDTO.Ready,
-                Type = type
-            }, userGuid));
+                throw new ErrorHttpException("SessionDTO  not found", HttpStatusCode.NotFound);
+            }
+            return session;
+        }
 
-            return sessionGuid;
+        public SessionDTO AskAboutSession(Guid sessionGuid, Guid userGuid)
+        {
+            return CreateSessionDTO(FindSession(sessionGuid, userGuid));
+        }
+
+        public void CancelSession(Guid sessionGuid, Guid userGuid)
+        {
+            var session = FindSession(sessionGuid, userGuid);
+            // TODO: cancel session
+        }
+
+        public SessionDTO RequestSession(MachineTypeDTO type, Guid userGuid)
+        {
+            var sessionType = ClassMapUtils.MapMachineTypeDTOToSessionType(type);
+            if (modelService.TryFindSession(new User(userGuid), sessionType, out var session)) return CreateSessionDTO(session);
+            
+            // [WARNING] we may want to store users
+            session = modelService.CreateSession(new User(userGuid), sessionType);
+            sessionProcessService.StartSessionSearchProcess(session);
+
+            return CreateSessionDTO(session);
+        }
+
+        private SessionDTO CreateSessionDTO(Session session)
+        {
+            return new SessionDTO()
+            {
+                Id = session.SessionGuid.ToString(),
+                Status = ClassMapUtils.MapSessionStateToDTO(session.SessionState),
+                Address = ClassMapUtils.MapAddressToDTO(session.CorrelatedMachine?.IpAddress),
+                Type = ClassMapUtils.MapSessionTypeToDTO(session.SessionType)
+            };
         }
     }
 }
