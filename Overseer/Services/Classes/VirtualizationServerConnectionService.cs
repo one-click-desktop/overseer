@@ -6,6 +6,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OneClickDesktop.BackendClasses.Communication;
+using OneClickDesktop.BackendClasses.Communication.MessagesTemplates;
 using OneClickDesktop.Overseer.Helpers.Settings;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
@@ -121,11 +122,16 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <param name="args"></param>
         private void ReceiveModelReport(object sender, MessageEventArgs args)
         {
-            if (args.RabbitMessage.Type == ModelReportMessage.MessageTypeName)
+            switch (args.RabbitMessage.Type)
             {
-                var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Body);
-                modelService.UpdateServerInfo(data);
-                logger.LogInformation($"Updated server model");
+                case ModelReportMessage.MessageTypeName:
+                    var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Body);
+                    modelService.UpdateServerInfo(data);
+                    logger.LogInformation($"Updated server model");
+                    break;
+                case PingMessage.MessageTypeName:
+                    logger.LogDebug("ping message - ignoring");
+                    break;
             }
         }
         
