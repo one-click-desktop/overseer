@@ -44,9 +44,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     Name = server.ServerGuid.ToString(),
                     Resources = ConstructResourcesDTO(server.TotalResources, server.FreeResources),
                     Free = CalculateFreeMachines(server),
-                    Running = GetRunningMachines(server),
-                    // TODO: we need to change this in DTO, as we don't store server address
-                    Address = null
+                    Running = GetRunningMachines(server)
                 }).ToList()
             };
         }
