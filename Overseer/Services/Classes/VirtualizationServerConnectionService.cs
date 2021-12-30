@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OneClickDesktop.BackendClasses.Communication;
-using OneClickDesktop.BackendClasses.Communication.MessagesTemplates;
 using OneClickDesktop.Overseer.Helpers.Settings;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
@@ -106,6 +106,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 
                 SendRequest(new ModelReportMessage(null), null);
                 logger.LogInformation($"Requesting model update from virtualization servers");
+                
+                ProbeDeadServers(modelService.GetServers().Select(srv => srv.Queue));
                 
                 Thread.Sleep(conf.Value.ModelUpdateInterval * 1000);//from seconds to miliseconds
             }
