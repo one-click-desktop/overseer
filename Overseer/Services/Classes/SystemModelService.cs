@@ -50,6 +50,32 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
         }
 
+        public void RemoveDeadServer(string directQueueName)
+        {
+            if (directQueueName == null)
+                return;
+
+            try
+            {
+                rwLock.AcquireWriterLock(Timeout.Infinite);
+                VirtualizationServer toDelete = model.Servers.Values.FirstOrDefault(srv => srv.Queue == directQueueName);
+
+                if (toDelete != null)
+                {
+                    model.DeleteServer(toDelete.ServerGuid);
+                    model.DeleteSession(toDelete.Sessions.Keys);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Error on updating Server information in model");
+            }
+            finally
+            {
+                rwLock.ReleaseWriterLock();
+            }
+        }
+
         private void UpdateModelSessions(VirtualizationServer server)
         {
             foreach (var session in server.Sessions.Values)
