@@ -36,8 +36,7 @@ namespace OneClickDesktop.Overseer.Helpers
             {
                 // TODO: resolve name based on type
                 Name = type.Type,
-                // TODO: change code to string and assign type to code
-                Code = type.Type.GetHashCode()
+                Code = type.Type
             };
         }
 
@@ -47,15 +46,13 @@ namespace OneClickDesktop.Overseer.Helpers
             {
                 // TODO: resolve name based on type
                 Name = type.Type,
-                // TODO: change code to string and assign type to code
-                Code = type.Type.GetHashCode()
+                Code = type.Type
             };
         }
 
         public static SessionType MapMachineTypeDTOToSessionType(MachineTypeDTO machineType)
         {
-            // TODO: change to code after model change
-            return new SessionType() { Type = machineType.Name };
+            return new SessionType() { Type = machineType.Code };
         }
 
         public static MachineType MapSessionTypeToMachineType(SessionType sessionType)
