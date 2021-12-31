@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using Microsoft.Extensions.Logging;
@@ -57,6 +58,9 @@ namespace OneClickDesktop.Overseer.Services.Classes
             
             //Zarejestruj metode do otrzymywania inforacji o modelu (otrzymywanie w oddzielnym wątku)
             connection.Received += ReceiveModelReport;
+
+            //Zarejestruj usuwanie servera wirtualizacji gdy brakuje odpowiedzi
+            connection.Return += DeadServerHandler;
             
             //Wystartuj wątek do wysyłania wiadomości
             token = tokenSrc.Token;
@@ -66,34 +70,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             modelRequestThread.Start();
         }
 
-        /// <summary>
-        /// Add request to message queue
-        /// </summary>
-        /// <param name="message">Message to send</param>
-        /// <param name="queue">Target RabbitMQ queue, null to end to all servers</param>
-        public void SendRequest(IRabbitMessage message, string queue)
-        {
-            if (message != null)
-            {
-                requests.Add((message, queue));
-            }
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void ReceiveModelReport(object sender, MessageEventArgs args)
-        {
-            if (args.RabbitMessage.Type == ModelReportMessage.MessageTypeName)
-            {
-                var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Body);
-                modelService.UpdateServerInfo(data);
-                logger.LogInformation($"Updated server model");
-            }
-        }
-        
+        #region Thread workers
         /// <summary>
         /// 
         /// </summary>
@@ -119,7 +96,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 logger.LogInformation($"Send message {msg.message.Type}");
             }
         }
-
+        
         private void RequestModelUpdate()
         {
             while (true)
@@ -130,9 +107,78 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 SendRequest(new ModelReportMessage(null), null);
                 logger.LogInformation($"Requesting model update from virtualization servers");
                 
+                ProbeDeadServers(modelService.GetServers().Select(srv => srv.Queue));
+                
                 Thread.Sleep(conf.Value.ModelUpdateInterval * 1000);//from seconds to miliseconds
             }
         }
+        
+        
+        #endregion
+        
+        #region Event handlers
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void ReceiveModelReport(object sender, MessageEventArgs args)
+        {
+            switch (args.RabbitMessage.Type)
+            {
+                case ModelReportMessage.MessageTypeName:
+                    var data = ModelReportMessage.ConversionReceivedData(args.RabbitMessage.Body);
+                    modelService.UpdateServerInfo(data);
+                    logger.LogInformation($"Updated server model");
+                    break;
+                case PingMessage.MessageTypeName:
+                    logger.LogDebug("ping message - ignoring");
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void DeadServerHandler(object sender, ReturnEventArgs args)
+        {
+            //TODO: wyniesc gdzies nazwe tej kolejki
+            if (args.Exchange == "virt_servers_direct" && args.ReturnReason == ReturnEventArgs.Reason.NO_QUEUE)
+            {
+                modelService.RemoveDeadServer(args.RoutingKey);
+                logger.LogInformation($"Server from queue {args.RoutingKey} is dead. Removing from model.");
+            }
+        }
+        #endregion
+
+        public void ProbeDeadServers(IEnumerable<string> queueList)
+        {
+            foreach (string queue in queueList)
+            {
+                connection.SendToVirtServer(queue, new PingMessage());
+            }
+        }
+        
+        /// <summary>
+        /// Add request to message queue
+        /// </summary>
+        /// <param name="message">Message to send</param>
+        /// <param name="queue">Target RabbitMQ queue, null to end to all servers</param>
+        public void SendRequest(IRabbitMessage message, string queue)
+        {
+            if (message != null)
+            {
+                requests.Add((message, queue));
+            }
+        }
+        
+        
+        
+        
+
+        
 
         public void Dispose()
         {

@@ -12,6 +12,8 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
 
         public void UpdateServerInfo(VirtualizationServer serverInfo);
 
+        public void RemoveDeadServer(string directQueueName);
+
         public IEnumerable<VirtualizationServer> GetServers();
 
         public Session GetSession(Guid sessionGuid);
