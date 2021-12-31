@@ -231,14 +231,15 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 // for each machine type select server and generate domain name
                 foreach (var machineType in machinesToStart)
                 {
-                    var server = servers
+                    var serverTuple = servers
                                  .Where(server => server.TemplateResources.ContainsKey(machineType.Type))
-                                 .OrderByDescending(
-                                     server => CanCreateMachines(server, machineType, serverResources))
+                                 .Select(server => (server, CanCreateMachines(server, machineType, serverResources)))
+                                 .OrderByDescending(tuple => tuple.Item2)
                                  .FirstOrDefault();
+                    
+                    if (serverTuple.server == null || serverTuple.Item2 <= 0) continue;
 
-                    if (server == null) continue;
-
+                    var server = serverTuple.server;
                     DecreaseServerResources(serverResources, server, machineType);
                     domains.Add(new DomainStartup(server, GenerateMachineDomainName(server, machineType), machineType));
                 }
