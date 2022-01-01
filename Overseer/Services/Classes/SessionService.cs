@@ -17,9 +17,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private readonly ISystemModelService modelService;
         private readonly ISessionProcessService sessionProcessService;
 
-        public SessionService(ISystemModelService modelService,
+        public SessionService(IVirtualizationServerConnectionService virtSrvConnection,
+        ISystemModelService modelService,
             ISessionProcessService sessionProcessService)
         {
+            this.virtSrvConnection = virtSrvConnection;
             this.modelService = modelService;
             this.sessionProcessService = sessionProcessService;
         }

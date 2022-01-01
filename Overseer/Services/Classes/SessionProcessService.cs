@@ -44,7 +44,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         public void StartSessionSearchProcess(Session session)
         {
             // look for machine for session
-            CheckSession(session, null);
+            CheckSession(session.SessionGuid, session, null);
         }
 
         private void OnServerUpdated(object sender, Guid serverGuid)
@@ -74,14 +74,14 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 {
                     var session = modelService.GetSession(item.session);
                     var machine = modelService.GetMachine(serverGuid, item.machine);
-                    CheckSession(session, machine);
+                    CheckSession(item.session, session, machine);
                 }
             }
         }
 
-        private void CheckSession(Session session, Machine machineCrush)
+        private void CheckSession(Guid sessionGuid, Session session, Machine machineCrush)
         {
-            if (session.SessionState is SessionState.Running or SessionState.Cancelled)
+            if (session?.SessionState is SessionState.Running or SessionState.Cancelled)
             {
                 return;
             }
@@ -89,17 +89,22 @@ namespace OneClickDesktop.Overseer.Services.Classes
             // was waiting for machine, and it didnt change
             if (machineCrush != null && machineCrush.State == MachineState.Free)
             {
-                AddToList(session, machineCrush);
+                AddToList(sessionGuid, machineCrush);
+                return;
             }
-
+            
+            //Session is not already propagated but model update has come
+            if (session == null)
+                return;
+            
             var machine = modelService.GetMachineForSession(session);
             if (machine == null)
             {
                 modelService.CancelSession(session);
                 return;
             }
-
-            AddToList(session, machine);
+            
+            AddToList(session.SessionGuid, machine);
 
             connectionService.SendRequest(
                 new SessionCreationMessage(new SessionCreationRDTO()
@@ -111,10 +116,10 @@ namespace OneClickDesktop.Overseer.Services.Classes
             );
         }
 
-        private void AddToList(Session session, Machine machine)
+        private void AddToList(Guid sessionGuid, Machine machine)
         {
             var serverGuid = machine.ParentServer.ServerGuid;
-            var item = (session.SessionGuid, machine.Name);
+            var item = (sessionGuid, machine.Name);
             if (waitingForServerChange.ContainsKey(serverGuid))
             {
                 waitingForServerChange[serverGuid].Add(item);
