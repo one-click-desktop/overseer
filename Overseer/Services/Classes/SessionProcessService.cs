@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Loader;
 using System.Threading;
+using System.Timers;
+using NLog.LayoutRenderers;
 using OneClickDesktop.BackendClasses.Communication.RabbitDTOs;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.States;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
+using Timer = System.Timers.Timer;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
@@ -18,27 +23,30 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private readonly CancellationTokenSource tokenSrc = new CancellationTokenSource();
         private CancellationToken token;
         private Thread sessionSearchThread = null;
-        private Thread sessionCancelThread = null;
+        private Thread sessionDeleteThread = null;
 
         private ConcurrentDictionary<Guid, IList<(Guid session, string machine)>> waitingForServerChange =
             new ConcurrentDictionary<Guid, IList<(Guid session, string machine)>>();
 
         private BlockingCollection<Guid> changes = new BlockingCollection<Guid>();
 
+        private BlockingCollection<(string, string, MachineState)> changedMachines =
+            new BlockingCollection<(string, string, MachineState)>();
+
         public SessionProcessService(ISystemModelService modelService,
-                                     IVirtualizationServerConnectionService connectionService)
+            IVirtualizationServerConnectionService connectionService)
         {
             this.modelService = modelService;
             this.connectionService = connectionService;
             token = tokenSrc.Token;
 
             sessionSearchThread = new Thread(SessionSearch);
-            sessionCancelThread = new Thread(SessionCancel);
+            sessionDeleteThread = new Thread(SessionDelete);
 
             modelService.ServerUpdated += OnServerUpdated;
 
             sessionSearchThread.Start();
-            //sessionCancelThread.Start();
+            sessionDeleteThread.Start();
         }
 
         public void StartSessionSearchProcess(Session session)
@@ -50,7 +58,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private void OnServerUpdated(object sender, Guid serverGuid)
         {
             changes.Add(serverGuid);
-            // TODO: detect session waiting for delete and start process
+
+            //dodaj maszyny, ktore zmienily stan w aktualizacji do kolekcji
+            //Watek badajacy czas do wylaczenia zadecyduje co z nimi zrobic
+            //Potrzeba tylko guida zmienionej maszyny, nazwy kolejki servera oraz stanu jaki byl przy zmianie
+            foreach (Machine m in modelService.GetMachinesFromServer(serverGuid))
+                changedMachines.Add((m.Name, m.ParentServer.Queue, m.State));
         }
 
         private void SessionSearch()
@@ -66,7 +79,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 {
                     return;
                 }
-                
+
                 // check if sessions waiting for machine on this server
                 if (!waitingForServerChange.TryRemove(serverGuid, out var waiting)) continue;
 
@@ -92,18 +105,18 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 AddToList(sessionGuid, machineCrush);
                 return;
             }
-            
+
             //Session is not already propagated but model update has come
             if (session == null)
                 return;
-            
+
             var machine = modelService.GetMachineForSession(session);
             if (machine == null)
             {
                 modelService.CancelSession(session);
                 return;
             }
-            
+
             AddToList(session.SessionGuid, machine);
 
             connectionService.SendRequest(
@@ -132,9 +145,128 @@ namespace OneClickDesktop.Overseer.Services.Classes
             };
         }
 
-        private void SessionCancel()
+        private class ShutdownCounter
+        {
+            public string MachineName;
+            public string VirtSrvQueuename;
+            public uint Counter;
+
+            public ShutdownCounter(string machineName)
+            {
+                Counter = 0;
+                MachineName = machineName;
+            }
+
+            /// <summary>
+            /// Tell if counter is over waiting threshold
+            /// </summary>
+            /// <param name="intervalMs">Interval of incrementation</param>
+            /// <param name="maxTimeMs">Waiting threshold</param>
+            /// <returns>True - timer is expired</returns>
+            public bool IsExpired(ulong intervalMs, ulong maxTimeMs)
+            {
+                return intervalMs * Counter > maxTimeMs;
+            }
+
+            public override bool Equals(object? obj)
+            {
+                if (!(obj is ShutdownCounter))
+                    return false;
+
+                return ((ShutdownCounter) obj).MachineName == MachineName;
+            }
+
+            public override int GetHashCode()
+            {
+                return MachineName.GetHashCode();
+            }
+        }
+
+        private void SessionDelete()
         {
             //co jakis czas sprawdz, czy sesja + maszyna do smieci (to juz jest watek)
+            HashSet<ShutdownCounter> shutdownCounters = new HashSet<ShutdownCounter>();
+            object counterMutex = new object();
+
+            System.Timers.Timer shutdownCounterTimer = new System.Timers.Timer();
+            shutdownCounterTimer.Enabled = true;
+            shutdownCounterTimer.Interval =
+                1000 * 5; //[TODO][CONFIG] WYnieśc do konfiguracji! - interwal sprawdzania czy maszyna powinna zostac zamknieta
+            shutdownCounterTimer.AutoReset = true;
+
+            //Zwiekszanie liczników dla maszyn w wątku timera
+            shutdownCounterTimer.Elapsed += (sender, args) =>
+            {
+                lock (counterMutex)
+                {
+                    if (shutdownCounters.Count == 0)
+                        return;
+
+                    foreach (ShutdownCounter c in shutdownCounters)
+                        
+                        c.Counter++;
+
+                    //Jeżeli jakies maszyny przekrocza dozwolony ca soczekiwania zgłoś je do wyłaczenia
+                    var toShutdown =
+                        shutdownCounters.Where(c =>
+                            c.IsExpired(1000 * 5,
+                                1000 * 20)); //[TODO][CONFIG] WYnieśc do konfiguracji! - interwal sprawdzania czy maszyna powinna zostac zamknieta
+                    if (toShutdown?.Count() > 0)
+                    {
+                        foreach (var machineInfo in toShutdown)
+                        {
+                            connectionService.SendRequest(
+                                new DomainShutdownMessage(
+                                    new DomainShutdownRDTO()
+                                    {
+                                        DomainName = machineInfo.MachineName
+                                    }),
+                                machineInfo.VirtSrvQueuename
+                            );
+
+                            shutdownCounters.Remove(machineInfo);
+                        }
+                    }
+                }
+            };
+
+            shutdownCounterTimer.Start();
+
+            while (true)
+            {
+                string machineName;
+                string queueName;
+                MachineState state;
+                try
+                {
+                    (machineName, queueName, state) = changedMachines.Take(token);
+                }
+                catch (OperationCanceledException e)
+                {
+                    shutdownCounterTimer.Enabled = false;
+                    shutdownCounterTimer.Stop();
+                    return;
+                }
+
+                lock (counterMutex)
+                {
+                    //Dodaj maszyny oczekujące na zamknięcie jeżeli juz jeszcze jej nie ma
+                    if (state == MachineState.WaitingForShutdown)
+                    {
+                        ShutdownCounter counter = new ShutdownCounter(machineName);
+                        if (!shutdownCounters.Contains(counter))
+                            shutdownCounters.Add(counter);
+                    }
+
+                    //Znanjdz maszyny, ktore juz oczekiwaly na zamkniecie i ponownie ktos sie do nich podlaczyl
+                    if (state != MachineState.WaitingForShutdown)
+                    {
+                        ShutdownCounter counter = new ShutdownCounter(machineName);
+                        if (shutdownCounters.Contains(counter))
+                            shutdownCounters.Remove(counter);
+                    }
+                }
+            }
         }
 
         public void Dispose()
@@ -143,7 +275,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 tokenSrc.Cancel();
                 sessionSearchThread?.Join();
-                sessionCancelThread?.Join();
+                sessionDeleteThread?.Join();
             }
         }
     }

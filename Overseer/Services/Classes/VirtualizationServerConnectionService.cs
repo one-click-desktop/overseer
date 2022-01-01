@@ -116,7 +116,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 SendRequest(new ModelReportMessage(null), null);
                 logger.LogInformation($"Requesting model update from virtualization servers");
                 
-                ProbeDeadServers(modelService.GetServers().Select(srv => srv.Queue));
+                ProbeDeadServers(modelService.GetServers().Select(srv => srv.Queue).ToList());
                 
                 Thread.Sleep(conf.Value.ModelUpdateInterval * 1000);//from seconds to miliseconds
             }
