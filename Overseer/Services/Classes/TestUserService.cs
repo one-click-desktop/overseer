@@ -33,7 +33,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var user = context.Users.SingleOrDefault(x => x.Username == loginData.Login);
 
             // validate
-            if (user == null || loginData.Password != user.Password)
+            if (user == null || loginData.Password != user.PasswordHash)
                 throw new ErrorHttpException("Bad credentials", HttpStatusCode.Unauthorized);
 
             // authentication successful so generate jwt token
