@@ -79,7 +79,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
         private void CheckSession(Session session, Machine machineCrush)
         {
-            if (session.SessionState == SessionState.Running)
+            if (session.SessionState is SessionState.Running or SessionState.Cancelled)
             {
                 return;
             }
@@ -94,7 +94,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
             if (machine == null)
             {
                 modelService.CancelSession(session);
-                // TODO: send servers info about session cancellation
                 return;
             }
 

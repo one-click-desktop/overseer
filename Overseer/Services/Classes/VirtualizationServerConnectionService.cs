@@ -173,20 +173,14 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// Add request to message queue
         /// </summary>
         /// <param name="message">Message to send</param>
-        /// <param name="queue">Target RabbitMQ queue, null to end to all servers</param>
-        public void SendRequest(IRabbitMessage message, string queue)
+        /// <param name="queue">Target RabbitMQ queue, null to send to all servers</param>
+        public void SendRequest(IRabbitMessage message, string queue = null)
         {
             if (message != null)
             {
                 requests.Add((message, queue));
             }
         }
-        
-        
-        
-        
-
-        
 
         public void Dispose()
         {

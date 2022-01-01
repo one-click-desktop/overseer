@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Net;
 using OneClickDesktop.Api.Models;
+using OneClickDesktop.BackendClasses.Communication.RabbitDTOs;
 using OneClickDesktop.BackendClasses.Model;
+using OneClickDesktop.BackendClasses.Model.States;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
+using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
@@ -15,7 +18,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private readonly ISessionProcessService sessionProcessService;
 
         public SessionService(ISystemModelService modelService,
-                              ISessionProcessService sessionProcessService)
+            ISessionProcessService sessionProcessService)
         {
             this.modelService = modelService;
             this.sessionProcessService = sessionProcessService;
@@ -28,6 +31,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 throw new ErrorHttpException("SessionDTO  not found", HttpStatusCode.NotFound);
             }
+
             return session;
         }
 
@@ -39,14 +43,49 @@ namespace OneClickDesktop.Overseer.Services.Classes
         public void CancelSession(Guid sessionGuid, Guid userGuid)
         {
             var session = FindSession(sessionGuid, userGuid);
-            // TODO: cancel session
+
+            if (session == null)
+                return;
+
+            //Wyslij do wszystkich virtserverów informacje o cancelacji sesji.
+            //Informacje o udanej cancelacji przechwycimy w odbiorze modelu - co przerwie proces szukania maszyny
+            //lub anuluje juz znalezioną maszynę
+
+            virtSrvConnection.SendRequest(
+                new SessionCancelMessage(
+                    new SessionCancelRDTO()
+                    {
+                        SessionGuid = sessionGuid
+                    }
+                ));
+
+            return;
+            SessionState oldState = session.SessionState;
+            modelService.CancelSession(session);
+            if (oldState == SessionState.Pending)
+            {
+                //znajdz poproszona maszyne i mowimy serwerowi aby oznaczyl maszyne jako wolna oraz usunal sesje z modelu
+
+                //Jezeli zostala przypisana do niej dana sesja
+
+                //Wysylij do jednego servera
+            }
+            else if (oldState == SessionState.Running)
+            {
+                //jezeli maszyna jest occupied (nie mozna) - ignoruj na virtsrv
+
+                //jezeli maszyna zarezerwowana - oznacz jako wolna i usun sesje z modelu (virtsrv)
+
+                //Wyślij do jednego servera
+            }
         }
 
         public SessionDTO RequestSession(MachineTypeDTO type, Guid userGuid)
         {
             var sessionType = ClassMapUtils.MapMachineTypeDTOToSessionType(type);
-            if (modelService.TryFindSession(new User(userGuid), sessionType, out var session)) return CreateSessionDTO(session);
-            
+            if (modelService.TryFindSession(new User(userGuid), sessionType, out var session))
+                return CreateSessionDTO(session);
+
             // [WARNING] we may want to store users
             session = modelService.CreateSession(new User(userGuid), sessionType);
             sessionProcessService.StartSessionSearchProcess(session);
