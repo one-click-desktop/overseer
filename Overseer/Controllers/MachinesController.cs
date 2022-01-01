@@ -16,6 +16,8 @@ namespace OneClickDesktop.Overseer.Controllers
     {
         private readonly IResourcesService resourcesService;
 
+        private User RequestUser => (User)HttpContext.Items["User"];
+
         public MachinesController(IResourcesService machinesService)
         {
             this.resourcesService = machinesService;
@@ -24,7 +26,7 @@ namespace OneClickDesktop.Overseer.Controllers
         [Authorize]
         public override IActionResult GetMachines()
         {
-            var machines = resourcesService.GetMachinesInfo();
+            var machines = resourcesService.GetMachinesInfo(RequestUser.Id);
             return Ok(machines);
         }
     }
