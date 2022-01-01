@@ -29,7 +29,7 @@ namespace OneClickDesktop.Overseer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>();
+            services.AddDbContext<TestDataContext>();
             services.AddCors();
             services.AddControllers().AddJsonOptions(x =>
             {
@@ -62,7 +62,7 @@ namespace OneClickDesktop.Overseer
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TestDataContext context)
         {
             createTestUsers(context);
 
@@ -99,7 +99,7 @@ namespace OneClickDesktop.Overseer
             });
         }
 
-        private void createTestUsers(DataContext context)
+        private void createTestUsers(TestDataContext context)
         {
             // add hardcoded test users to db on startup
             var testUsers = new List<User>

@@ -15,11 +15,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class UserService : IUserService
     {
-        private DataContext context;
+        private TestDataContext context;
         private IJwtUtils jwtUtils;
         private readonly JwtSettings jwtSettings;
 
-        public UserService(DataContext context,
+        public UserService(TestDataContext context,
             IJwtUtils jwtUtils,
             IOptions<JwtSettings> jwtSettings)
         {
