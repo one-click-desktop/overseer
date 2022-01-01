@@ -5,10 +5,12 @@ using System.Linq;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Timers;
+using Microsoft.Extensions.Options;
 using NLog.LayoutRenderers;
 using OneClickDesktop.BackendClasses.Communication.RabbitDTOs;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.States;
+using OneClickDesktop.Overseer.Helpers.Settings;
 using OneClickDesktop.Overseer.Messages;
 using OneClickDesktop.Overseer.Services.Interfaces;
 using Timer = System.Timers.Timer;
@@ -17,6 +19,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
 {
     public class SessionProcessService : ISessionProcessService, IDisposable
     {
+        private readonly IOptions<OneClickDesktopSettings> ocdConfiguration;
+        
         private readonly ISystemModelService modelService;
         private readonly IVirtualizationServerConnectionService connectionService;
 
@@ -34,8 +38,10 @@ namespace OneClickDesktop.Overseer.Services.Classes
             new BlockingCollection<(string, string, MachineState)>();
 
         public SessionProcessService(ISystemModelService modelService,
-            IVirtualizationServerConnectionService connectionService)
+            IVirtualizationServerConnectionService connectionService,
+            IOptions<OneClickDesktopSettings> ocdConfiguration)
         {
+            this.ocdConfiguration = ocdConfiguration;
             this.modelService = modelService;
             this.connectionService = connectionService;
             token = tokenSrc.Token;
@@ -165,7 +171,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             /// <returns>True - timer is expired</returns>
             public bool IsExpired(ulong intervalMs, ulong maxTimeMs)
             {
-                return intervalMs * Counter > maxTimeMs;
+                return intervalMs * Counter >= maxTimeMs;
             }
 
             public override bool Equals(object? obj)
@@ -190,8 +196,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
             System.Timers.Timer shutdownCounterTimer = new System.Timers.Timer();
             shutdownCounterTimer.Enabled = true;
-            shutdownCounterTimer.Interval =
-                1000 * 5; //[TODO][CONFIG] WYnieśc do konfiguracji! - interwal sprawdzania czy maszyna powinna zostac zamknieta
+            shutdownCounterTimer.Interval = ocdConfiguration.Value.DomainShutdownCounterInterval * 1000;
             shutdownCounterTimer.AutoReset = true;
 
             //Zwiekszanie liczników dla maszyn w wątku timera
@@ -209,8 +214,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     //Jeżeli jakies maszyny przekrocza dozwolony ca soczekiwania zgłoś je do wyłaczenia
                     var toShutdown =
                         shutdownCounters.Where(c =>
-                            c.IsExpired(1000 * 5,
-                                1000 * 20)); //[TODO][CONFIG] WYnieśc do konfiguracji! - interwal sprawdzania czy maszyna powinna zostac zamknieta
+                            c.IsExpired((ulong)ocdConfiguration.Value.DomainShutdownCounterInterval * 1000,//seconds -> miliseconds
+                                (ulong)ocdConfiguration.Value.DomainShutdownTimeout * 60 * 1000));//minutes -> miliseconds
                     if (toShutdown?.Count() > 0)
                     {
                         foreach (var machineInfo in toShutdown)
