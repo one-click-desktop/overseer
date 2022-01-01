@@ -43,6 +43,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
         public void StartSessionSearchProcess(Session session)
         {
+            // look for machine for session
             CheckSession(session, null);
         }
 
@@ -62,6 +63,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 // wait for change
                 var serverGuid = changes.Take();
 
+                // check if sessions waiting for machine on this server
                 if (!waitingForServerChange.TryRemove(serverGuid, out var waiting)) continue;
 
                 foreach (var item in waiting)

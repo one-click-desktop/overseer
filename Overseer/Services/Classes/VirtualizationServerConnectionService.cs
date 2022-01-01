@@ -13,6 +13,7 @@ using OneClickDesktop.Overseer.Services.Interfaces;
 using OneClickDesktop.RabbitModule.Common.EventArgs;
 using OneClickDesktop.RabbitModule.Common.RabbitMessage;
 using OneClickDesktop.RabbitModule.Overseer;
+using static OneClickDesktop.RabbitModule.Common.Constants;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
@@ -144,8 +145,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <param name="args"></param>
         private void DeadServerHandler(object sender, ReturnEventArgs args)
         {
-            //TODO: wyniesc gdzies nazwe tej kolejki
-            if (args.Exchange == "virt_servers_direct" && args.ReturnReason == ReturnEventArgs.Reason.NO_QUEUE)
+            if (args.Exchange == Exchanges.VirtServersDirect && args.ReturnReason == ReturnEventArgs.Reason.NO_QUEUE)
             {
                 modelService.RemoveDeadServer(args.RoutingKey);
                 logger.LogInformation($"Server from queue {args.RoutingKey} is dead. Removing from model.");
