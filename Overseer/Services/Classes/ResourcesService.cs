@@ -4,6 +4,7 @@ using System.Linq;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.Resources;
+using OneClickDesktop.BackendClasses.Model.States;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Services.Interfaces;
 
@@ -26,19 +27,19 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var servers = modelService.GetServers();
             var virtualizationServers = servers.ToList();
             var (totalServerResources, freeServerResources) = virtualizationServers
-                                                              .Select(server =>
-                                                                          (server.TotalResources,
-                                                                           server.FreeResources)
-                                                              )
-                                                              .Aggregate((a1, a2) =>
-                                                                             (a1.TotalResources + a2.TotalResources,
-                                                                              a1.FreeResources +
-                                                                              a2.FreeResources)
-                                                              );
+                .Select(server =>
+                    (server.TotalResources,
+                        server.FreeResources)
+                )
+                .Aggregate((a1, a2) =>
+                    (a1.TotalResources + a2.TotalResources,
+                        a1.FreeResources +
+                        a2.FreeResources)
+                );
             return new TotalResourcesDTO()
             {
                 Total = ConstructResourcesDTO(totalServerResources,
-                                              freeServerResources),
+                    freeServerResources),
                 Servers = virtualizationServers.Select(server => new ServerDTO()
                 {
                     Name = server.ServerGuid.ToString(),
@@ -52,32 +53,40 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <summary>
         /// Get amount of available machines by type
         /// </summary>
-        public IEnumerable<MachineDTO> GetMachinesInfo()
+        public IEnumerable<MachineDTO> GetMachinesInfo(Guid userGuid)
         {
             return modelService.GetServers()
-                               .SelectMany(server => CalculateFreeMachines(server, true))
-                               .GroupBy(machine => machine.Type)
-                               .Select(group => new MachineDTO()
-                               {
-                                   Type = group.Key,
-                                   Amount = group.Sum(machine => machine.Amount)
-                               });
+                .SelectMany(server => CalculateFreeMachines(server, userGuid))
+                .GroupBy(machine => machine.Type)
+                .Select(group => new MachineDTO()
+                {
+                    Type = group.Key,
+                    Amount = group.Sum(machine => machine.Amount)
+                });
         }
 
         /// <summary>
         /// Calculate amount of machines that can be created on server by type
         /// </summary>
-        private static List<MachineDTO> CalculateFreeMachines(VirtualizationServer server, bool useAvailable = false)
+        private List<MachineDTO> CalculateFreeMachines(VirtualizationServer server, Guid? userGuid = null)
         {
-            var freeResources = useAvailable ? server.AvailableResources : server.FreeResources;
+            var freeResources = userGuid.HasValue ? server.AvailableResources : server.FreeResources;
 
             return server.TemplateResources.Select(pair =>
             {
                 var (type, templateResources) = pair;
+
+                var added = userGuid.HasValue && server.Sessions.Values.Any(session =>
+                    session.SessionState is SessionState.Running or SessionState.WaitingForRemoval
+                    && userGuid.Value.Equals(session.CorrelatedUser.Guid)
+                    && type.Equals(session?.CorrelatedMachine
+                        ?.MachineType?.Type))
+                    ? 1
+                    : 0;
                 return new MachineDTO()
                 {
-                    Type = ClassMapUtils.MapMachineTypeToDTO(new MachineType() { Type = type }),
-                    Amount = CalculateFreeMachinesForTemplate(freeResources, templateResources)
+                    Type = ClassMapUtils.MapMachineTypeToDTO(new MachineType() {Type = type}),
+                    Amount = CalculateFreeMachinesForTemplate(freeResources, templateResources) + added
                 };
             }).ToList();
         }
@@ -85,29 +94,29 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// <summary>
         /// Get list of machines running on server by machine type
         /// </summary>
-        private static List<MachineDTO> GetRunningMachines(VirtualizationServer server)
+        private List<MachineDTO> GetRunningMachines(VirtualizationServer server)
         {
             return server.RunningMachines.Values.GroupBy(machine => machine.MachineType)
-                         .Select(group => new MachineDTO()
-                         {
-                             Amount = group.Count(),
-                             Type = ClassMapUtils.MapMachineTypeToDTO(group.Key)
-                         }).ToList();
+                .Select(group => new MachineDTO()
+                {
+                    Amount = group.Count(),
+                    Type = ClassMapUtils.MapMachineTypeToDTO(group.Key)
+                }).ToList();
         }
 
         /// <summary>
         /// Calculates amount of machines that can be created from template resources
         /// </summary>
-        private static int CalculateFreeMachinesForTemplate(ServerResources serverResources,
-                                                            TemplateResources templateResources)
+        private int CalculateFreeMachinesForTemplate(ServerResources serverResources,
+            TemplateResources templateResources)
         {
             var res = Math.Min(serverResources.CpuCores / templateResources.CpuCores,
-                               Math.Min(serverResources.Memory / templateResources.Memory,
-                                        serverResources.Storage / templateResources.Storage));
+                Math.Min(serverResources.Memory / templateResources.Memory,
+                    serverResources.Storage / templateResources.Storage));
             return templateResources.AttachGpu ? Math.Min(res, serverResources.GpuCount) : res;
         }
 
-        private static ResourcesDTO ConstructResourcesDTO(ServerResources totalResources, ServerResources freeResources)
+        private ResourcesDTO ConstructResourcesDTO(ServerResources totalResources, ServerResources freeResources)
         {
             return new ResourcesDTO()
             {
@@ -118,7 +127,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             };
         }
 
-        private static ResourceDTO ConstructResourceDTO(int total, int free)
+        private ResourceDTO ConstructResourceDTO(int total, int free)
         {
             return new ResourceDTO()
             {

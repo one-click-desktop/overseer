@@ -188,8 +188,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             return machineForSession;
         }
 
-        public IEnumerable<DomainStartup>
-            GetDomainsForStartup()
+        public IEnumerable<DomainStartup> GetDomainsForStartup()
         {
             var domains = new List<DomainStartup>();
             try
