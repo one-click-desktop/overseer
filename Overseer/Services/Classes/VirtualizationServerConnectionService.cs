@@ -78,23 +78,30 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             while (true)
             {
-                var msg = requests.Take(token);
+                IRabbitMessage message;
+                string queue;
                 
-                if (token.IsCancellationRequested)
-                    return;
-                
-                if (msg.queue != null)
+                try
                 {
-                    msg.message.SenderIdentifier = conf.Value.OverseerId;
-                    connection.SendToVirtServer(msg.queue, msg.message);
-                    logger.LogDebug($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
+                    (message, queue) = requests.Take(token);
+                }
+                catch (OperationCanceledException e)
+                {
+                    return;
+                }
+
+                if (queue != null)
+                {
+                    message.SenderIdentifier = conf.Value.OverseerId;
+                    connection.SendToVirtServer(queue, message);
+                    logger.LogDebug($"Message sent to virtualization server {queue} {JsonSerializer.Serialize(message)}");
                 }
                 else
                 {
-                    connection.SendToAllVirtServers(msg.message);
-                    logger.LogDebug($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
+                    connection.SendToAllVirtServers(message);
+                    logger.LogDebug($"Message sent to virtualization servers {JsonSerializer.Serialize(message)}");
                 }
-                logger.LogInformation($"Send message {msg.message.Type}");
+                logger.LogInformation($"Send message {message.Type}");
             }
         }
         

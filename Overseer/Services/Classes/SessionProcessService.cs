@@ -56,11 +56,15 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             while (true)
             {
-                // wait for change
-                var serverGuid = changes.Take(token);
-
-                if (token.IsCancellationRequested)
+                Guid serverGuid;
+                try
+                {
+                    serverGuid = changes.Take(token);
+                }
+                catch (OperationCanceledException e)
+                {
                     return;
+                }
                 
                 if (!waitingForServerChange.TryRemove(serverGuid, out var waiting)) continue;
 
