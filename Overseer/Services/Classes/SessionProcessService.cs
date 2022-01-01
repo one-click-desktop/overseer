@@ -56,12 +56,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             while (true)
             {
+                // wait for change
+                var serverGuid = changes.Take(token);
+
                 if (token.IsCancellationRequested)
                     return;
-
-                // wait for change
-                var serverGuid = changes.Take();
-
+                
                 if (!waitingForServerChange.TryRemove(serverGuid, out var waiting)) continue;
 
                 foreach (var item in waiting)
@@ -124,6 +124,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
         private void SessionCancel()
         {
+            //co jakis czas sprawdz, czy sesja + maszyna do smieci (to juz jest watek)
         }
 
         public void Dispose()

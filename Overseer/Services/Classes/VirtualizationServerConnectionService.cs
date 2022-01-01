@@ -78,10 +78,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             while (true)
             {
+                var msg = requests.Take(token);
+                
                 if (token.IsCancellationRequested)
                     return;
-                var msg = requests.Take();
-
+                
                 if (msg.queue != null)
                 {
                     msg.message.SenderIdentifier = conf.Value.OverseerId;
