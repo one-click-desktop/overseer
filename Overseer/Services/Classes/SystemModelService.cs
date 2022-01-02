@@ -116,6 +116,29 @@ namespace OneClickDesktop.Overseer.Services.Classes
             return servers;
         }
 
+        public IEnumerable<Machine> GetMachinesFromServer(Guid serverGuid)
+        {
+            IEnumerable<Machine> machines = null;
+            try
+            {
+                rwLock.AcquireReaderLock(Timeout.Infinite);
+                if (model.Servers.TryGetValue(serverGuid, out VirtualizationServer srv))
+                {
+                    machines = srv.RunningMachines.Values;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Error on reading server machines from model");
+            }
+            finally
+            {
+                rwLock.ReleaseReaderLock();
+            }
+
+            return machines;
+        }
+
         public Session CreateSession(User user, SessionType sessionType)
         {
             Session session = null;

@@ -79,22 +79,30 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             while (true)
             {
-                if (token.IsCancellationRequested)
-                    return;
-                var msg = requests.Take();
-
-                if (msg.queue != null)
+                IRabbitMessage message;
+                string queue;
+                
+                try
                 {
-                    msg.message.SenderIdentifier = conf.Value.OverseerId;
-                    connection.SendToVirtServer(msg.queue, msg.message);
-                    logger.LogDebug($"Message sent to virtualization server {msg.queue} {JsonSerializer.Serialize(msg.message)}");
+                    (message, queue) = requests.Take(token);
+                }
+                catch (OperationCanceledException e)
+                {
+                    return;
+                }
+
+                if (queue != null)
+                {
+                    message.SenderIdentifier = conf.Value.OverseerId;
+                    connection.SendToVirtServer(queue, message);
+                    logger.LogDebug($"Message sent to virtualization server {queue} {JsonSerializer.Serialize(message)}");
                 }
                 else
                 {
-                    connection.SendToAllVirtServers(msg.message);
-                    logger.LogDebug($"Message sent to virtualization servers {JsonSerializer.Serialize(msg.message)}");
+                    connection.SendToAllVirtServers(message);
+                    logger.LogDebug($"Message sent to virtualization servers {JsonSerializer.Serialize(message)}");
                 }
-                logger.LogInformation($"Send message {msg.message.Type}");
+                logger.LogInformation($"Send message {message.Type}");
             }
         }
         
@@ -108,7 +116,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 SendRequest(new ModelReportMessage(null), null);
                 logger.LogInformation($"Requesting model update from virtualization servers");
                 
-                ProbeDeadServers(modelService.GetServers().Select(srv => srv.Queue));
+                ProbeDeadServers(modelService.GetServers().Select(srv => srv.Queue).ToList());
                 
                 Thread.Sleep(conf.Value.ModelUpdateInterval * 1000);//from seconds to miliseconds
             }
@@ -165,20 +173,14 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// Add request to message queue
         /// </summary>
         /// <param name="message">Message to send</param>
-        /// <param name="queue">Target RabbitMQ queue, null to end to all servers</param>
-        public void SendRequest(IRabbitMessage message, string queue)
+        /// <param name="queue">Target RabbitMQ queue, null to send to all servers</param>
+        public void SendRequest(IRabbitMessage message, string queue = null)
         {
             if (message != null)
             {
                 requests.Add((message, queue));
             }
         }
-        
-        
-        
-        
-
-        
 
         public void Dispose()
         {

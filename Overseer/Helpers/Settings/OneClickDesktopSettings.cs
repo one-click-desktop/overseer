@@ -27,5 +27,14 @@ namespace OneClickDesktop.Overseer.Helpers.Settings
         /// Model requests to virtualization servers interval (in seconds)
         /// </summary>
         public int ModelUpdateInterval { get; set; }
+        /// <summary>
+        /// Domain shutdown timeout period (in minutes)
+        /// </summary>
+        public int DomainShutdownTimeout { get; set; } = 15;
+
+        /// <summary>
+        /// Domain Shutdown interval checking - should be divider of DomainShutdownTimeout (in seconds)
+        /// </summary>
+        public int DomainShutdownCounterInterval { get; set; } = 30;
     }
 }

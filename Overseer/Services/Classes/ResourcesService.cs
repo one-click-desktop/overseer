@@ -26,7 +26,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             var servers = modelService.GetServers();
             var virtualizationServers = servers.ToList();
-            var (totalServerResources, freeServerResources) = virtualizationServers
+
+            if (virtualizationServers.Count == 0)
+                return null;
+           
+           var (totalServerResources, freeServerResources) = virtualizationServers
                 .Select(server =>
                     (server.TotalResources,
                         server.FreeResources)
@@ -36,6 +40,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                         a1.FreeResources +
                         a2.FreeResources)
                 );
+
             return new TotalResourcesDTO()
             {
                 Total = ConstructResourcesDTO(totalServerResources,
