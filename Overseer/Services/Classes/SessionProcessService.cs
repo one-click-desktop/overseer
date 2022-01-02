@@ -208,7 +208,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
                         return;
 
                     foreach (ShutdownCounter c in shutdownCounters)
-                        
                         c.Counter++;
 
                     //Jeżeli jakies maszyny przekrocza dozwolony ca soczekiwania zgłoś je do wyłaczenia

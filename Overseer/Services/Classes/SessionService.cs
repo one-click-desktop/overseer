@@ -60,26 +60,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
                         SessionGuid = sessionGuid
                     }
                 ));
-
-            return;
-            SessionState oldState = session.SessionState;
-            modelService.CancelSession(session);
-            if (oldState == SessionState.Pending)
-            {
-                //znajdz poproszona maszyne i mowimy serwerowi aby oznaczyl maszyne jako wolna oraz usunal sesje z modelu
-
-                //Jezeli zostala przypisana do niej dana sesja
-
-                //Wysylij do jednego servera
-            }
-            else if (oldState == SessionState.Running)
-            {
-                //jezeli maszyna jest occupied (nie mozna) - ignoruj na virtsrv
-
-                //jezeli maszyna zarezerwowana - oznacz jako wolna i usun sesje z modelu (virtsrv)
-
-                //Wyślij do jednego servera
-            }
         }
 
         public SessionDTO RequestSession(MachineTypeDTO type, Guid userGuid)
