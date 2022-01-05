@@ -5,7 +5,7 @@ WORKDIR /overseer
 #Skopiowanie potrzebnych danych
 COPY  Overseer Overseer/
 COPY Overseer.sln .
-RUN ls -l
+COPY Overseer/config config
 
 #Zbudowanie
 RUN dotnet build
@@ -16,4 +16,5 @@ EXPOSE 5000
 EXPOSE 5001
 
 #Dodac tutaj from runtime i kopia binarek z poprzedniej warstwy!!!
-ENTRYPOINT ["dotnet", "out/OneClickDesktop.Overseer.dll"]
+ENV ASPNETCORE_ENVIRONMENT="Production"
+ENTRYPOINT ["dotnet", "out/OneClickDesktop.Overseer.dll", "-c", "config"]

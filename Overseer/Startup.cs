@@ -36,7 +36,7 @@ namespace OneClickDesktop.Overseer
                 // serialize enums as strings in api responses (e.g. Role)
                 x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-
+            
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
             services.Configure<OneClickDesktopSettings>(Configuration.GetSection("OneClickDesktop"));

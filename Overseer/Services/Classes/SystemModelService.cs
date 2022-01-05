@@ -216,6 +216,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var domains = new List<DomainStartup>();
             try
             {
+                //[TODO][CONFIG] Aktualnie zawsze istnieje przynajmniej jedna maszyna danego typu.
+                // Chcemy móc konfigurowac liczbę oczekujących maszyn 
                 rwLock.AcquireReaderLock(Timeout.Infinite);
 
                 var servers = model.Servers.Values.Where(server => server.Managable).ToList();
