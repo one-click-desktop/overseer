@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Timers;
+using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.Extensions.Options;
 using NLog.LayoutRenderers;
 using OneClickDesktop.BackendClasses.Communication.RabbitDTOs;
@@ -157,10 +158,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
             public string VirtSrvQueuename;
             public uint Counter;
 
-            public ShutdownCounter(string machineName)
+            public ShutdownCounter(string machineName, string virtSrvQueueName)
             {
                 Counter = 0;
                 MachineName = machineName;
+                VirtSrvQueuename = virtSrvQueueName;
             }
 
             /// <summary>
@@ -174,7 +176,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 return intervalMs * Counter >= maxTimeMs;
             }
 
-            public override bool Equals(object? obj)
+            public override bool Equals(object obj)
             {
                 if (!(obj is ShutdownCounter))
                     return false;
@@ -257,7 +259,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     //Dodaj maszyny oczekujące na zamknięcie jeżeli juz jeszcze jej nie ma
                     if (state == MachineState.WaitingForShutdown)
                     {
-                        ShutdownCounter counter = new ShutdownCounter(machineName);
+                        ShutdownCounter counter = new ShutdownCounter(machineName, queueName);
                         if (!shutdownCounters.Contains(counter))
                             shutdownCounters.Add(counter);
                     }
@@ -265,7 +267,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                     //Znanjdz maszyny, ktore juz oczekiwaly na zamkniecie i ponownie ktos sie do nich podlaczyl
                     if (state != MachineState.WaitingForShutdown)
                     {
-                        ShutdownCounter counter = new ShutdownCounter(machineName);
+                        ShutdownCounter counter = new ShutdownCounter(machineName, queueName);
                         if (shutdownCounters.Contains(counter))
                             shutdownCounters.Remove(counter);
                     }

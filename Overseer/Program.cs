@@ -14,7 +14,6 @@ namespace OneClickDesktop.Overseer
     {
         public static void Main(string[] args)
         {
-            Options parsedArgs;
             var parseResult = Parser.Default.ParseArguments<Options>(args);
             parseResult.WithParsed(o => RunOptions(o, args));
             parseResult.WithNotParsed(errs => HandleParseError(parseResult, errs));
@@ -30,8 +29,8 @@ namespace OneClickDesktop.Overseer
                     IHostEnvironment env = hostingContext.HostingEnvironment;
 
                     configuration
-                        .AddIniFile(Path.Join(opts.ConfigurationFolderPath, $"appsettings.{env.EnvironmentName}.ini"),
-                            true, true);
+                        .SetBasePath(Path.GetFullPath(opts.ConfigurationFolderPath))
+                        .AddIniFile($"appsettings.{env.EnvironmentName}.ini", true, true);
 
                     Console.WriteLine("Loaded configuration:");
                     foreach ((string key, string value) in

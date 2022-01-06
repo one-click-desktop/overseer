@@ -9,7 +9,7 @@ COPY Overseer/config config
 
 #Zbudowanie
 RUN dotnet build
-RUN dotnet publish -o out
+RUN dotnet publish -c Release -o out
 
 #Uruchomienie aplikacji
 EXPOSE 5000
