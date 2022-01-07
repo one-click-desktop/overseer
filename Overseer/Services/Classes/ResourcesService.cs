@@ -29,8 +29,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
             if (virtualizationServers.Count == 0)
                 return null;
-           
-           var (totalServerResources, freeServerResources) = virtualizationServers
+
+            var (totalServerResources, freeServerResources) = virtualizationServers
                 .Select(server =>
                     (server.TotalResources,
                         server.FreeResources)
@@ -75,23 +75,29 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// </summary>
         private List<MachineDTO> CalculateFreeMachines(VirtualizationServer server, Guid? userGuid = null)
         {
-            var freeResources = userGuid.HasValue ? server.AvailableResources : server.FreeResources;
-
             return server.TemplateResources.Select(pair =>
             {
                 var (type, templateResources) = pair;
 
-                var added = userGuid.HasValue && server.Sessions.Values.Any(session =>
-                    session.SessionState is SessionState.Running or SessionState.WaitingForRemoval
-                    && userGuid.Value.Equals(session.CorrelatedUser.Guid)
-                    && type.Equals(session?.CorrelatedMachine
-                        ?.MachineType?.Type))
-                    ? 1
-                    : 0;
+                var added = 0;
+                if (userGuid.HasValue)
+                {
+                    var free = server.RunningMachines.Values.Count(machine =>
+                        machine.State == MachineState.Free && type.Equals(machine.MachineType.Type));
+                    var correlated = server.Sessions.Values.Any(session =>
+                        session.SessionState is SessionState.Running or SessionState.WaitingForRemoval
+                        && userGuid.Value.Equals(session.CorrelatedUser.Guid)
+                        && type.Equals(session?.CorrelatedMachine
+                            ?.MachineType?.Type))
+                        ? 1
+                        : 0;
+                    added = free + correlated;
+                }
+
                 return new MachineDTO()
                 {
                     Type = ClassMapUtils.MapMachineTypeToDTO(new MachineType() {Type = type}),
-                    Amount = CalculateFreeMachinesForTemplate(freeResources, templateResources) + added
+                    Amount = CalculateFreeMachinesForTemplate(server.FreeResources, templateResources) + added
                 };
             }).ToList();
         }
