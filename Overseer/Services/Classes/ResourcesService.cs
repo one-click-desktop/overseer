@@ -83,12 +83,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 if (userGuid.HasValue)
                 {
                     var free = server.RunningMachines.Values.Count(machine =>
-                        machine.State == MachineState.Free && type.Equals(machine.MachineType.Type));
+                        machine.State == MachineState.Free && templateResources.TemplateType.Equals(machine.MachineType));
                     var correlated = server.Sessions.Values.Any(session =>
                         session.SessionState is SessionState.Running or SessionState.WaitingForRemoval
                         && userGuid.Value.Equals(session.CorrelatedUser.Guid)
-                        && type.Equals(session?.CorrelatedMachine
-                            ?.MachineType?.Type))
+                        && templateResources.TemplateType.Equals(session?.CorrelatedMachine
+                            ?.MachineType))
                         ? 1
                         : 0;
                     added = free + correlated;
@@ -96,7 +96,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
                 return new MachineDTO()
                 {
-                    Type = ClassMapUtils.MapMachineTypeToDTO(new MachineType() {Type = type}),
+                    Type = ClassMapUtils.MapMachineTypeToDTO(templateResources.TemplateType),
                     Amount = CalculateFreeMachinesForTemplate(server.FreeResources, templateResources) + added
                 };
             }).ToList();

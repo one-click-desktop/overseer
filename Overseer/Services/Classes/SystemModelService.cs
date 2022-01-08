@@ -224,8 +224,8 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
                 // find all machine types
                 var machineTypes = servers
-                                   .SelectMany(server => server.TemplateResources.Keys)
-                                   .Select(key => new MachineType() { Type = key })
+                                   .SelectMany(server => server.TemplateResources)
+                                   .Select(pair => pair.Value.TemplateType)
                                    .Distinct();
                 // find machine types with machines
                 var machinesStarted = servers
@@ -256,7 +256,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 foreach (var machineType in machinesToStart)
                 {
                     var serverTuple = servers
-                                 .Where(server => server.TemplateResources.ContainsKey(machineType.Type))
+                                 .Where(server => server.TemplateResources.ContainsKey(machineType.TechnicalName))
                                  .Select(server => (server, CanCreateMachines(server, machineType, serverResources)))
                                  .OrderByDescending(tuple => tuple.Item2)
                                  .FirstOrDefault();
@@ -283,7 +283,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private int CanCreateMachines(VirtualizationServer server, MachineType type,
                                       Dictionary<Guid, ServerResources> serverResourcesMap)
         {
-            var template = server.TemplateResources[type.Type];
+            var template = server.TemplateResources[type.TechnicalName];
             var resources = serverResourcesMap[server.ServerGuid];
 
             var count = Math.Min(resources.CpuCores / template.CpuCores,
@@ -296,7 +296,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                                              VirtualizationServer server, MachineType type)
         {
             // update map: decrease resources needed to create this machine
-            var template = server.TemplateResources[type.Type];
+            var template = server.TemplateResources[type.TechnicalName];
             var resources = serverResourcesMap[server.ServerGuid];
             serverResourcesMap[server.ServerGuid] = new ServerResources(
                 resources.Memory - template.Memory,
@@ -313,7 +313,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                                          .Select(machine => (int?)int.Parse(
                                                      machine.Name[(machine.Name.LastIndexOf('-') + 1)..]))
                                          .Max() ?? -1;
-            return $"{server.ServerGuid.ToString()}-{machineType.Type}-{lastDomainNumber + 1}";
+            return $"{server.ServerGuid.ToString()}-{machineType}-{lastDomainNumber + 1}";
         }
 
         public Machine GetMachine(Guid serverGuid, string machineName)

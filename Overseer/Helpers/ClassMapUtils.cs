@@ -45,8 +45,8 @@ namespace OneClickDesktop.Overseer.Helpers
             return new MachineTypeDTO()
             {
                 // TODO: resolve name based on type
-                Name = type.Type,
-                Code = type.Type
+                Name = type.HumanReadableName,
+                Code = type.TechnicalName
             };
         }
 
@@ -54,10 +54,15 @@ namespace OneClickDesktop.Overseer.Helpers
         {
             return new SessionType() { Type = machineType.Code };
         }
-
+        
+        /// <summary>
+        /// UWAGA! To jest niebezpieczne!! Tworzymy połowiczny obiekt bez HR stringa
+        /// </summary>
+        /// <param name="sessionType"></param>
+        /// <returns></returns>
         public static MachineType MapSessionTypeToMachineType(SessionType sessionType)
         {
-            return new MachineType() { Type = sessionType.Type };
+            return new MachineType() { TechnicalName = sessionType.Type };
         }
     }
 }
