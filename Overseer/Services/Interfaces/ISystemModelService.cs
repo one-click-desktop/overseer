@@ -16,6 +16,8 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
 
         public IEnumerable<VirtualizationServer> GetServers();
 
+        public IEnumerable<string> GetServerQueues();
+
         public IEnumerable<Machine> GetMachinesFromServer(Guid serverGuid);
 
         public Session GetSession(Guid sessionGuid);

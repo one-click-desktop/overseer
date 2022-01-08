@@ -115,6 +115,27 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
             return servers;
         }
+        
+        public IEnumerable<string> GetServerQueues()
+        {
+            IEnumerable<string> queues = null;
+            try
+            {
+                rwLock.AcquireReaderLock(Timeout.Infinite);
+
+                queues = model.Servers.Values.Select(s => s.Queue);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Error on getting domains for startup from model");
+            }
+            finally
+            {
+                rwLock.ReleaseReaderLock();
+            }
+
+            return queues;
+        }
 
         public IEnumerable<Machine> GetMachinesFromServer(Guid serverGuid)
         {
