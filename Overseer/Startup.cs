@@ -76,11 +76,6 @@ namespace OneClickDesktop.Overseer
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Overseer v1"));
             }
-
-            if (!env.IsDevelopment())
-            {
-                app.UseHttpsRedirection();
-            }
             
             app.UseCors(x => x
                              .AllowAnyOrigin()
