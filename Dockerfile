@@ -18,6 +18,6 @@ EXPOSE 5001
 #Dodac tutaj from runtime i kopia binarek z poprzedniej warstwy!!!
 ENV ASPNETCORE_ENVIRONMENT="Production"
 COPY ["assets/entry_point.sh", "entry_point.sh"]
-RUN curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -o wait-for-it.sh
+RUN curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -o /wait-for-it.sh && chmod +x /wait-for-it.sh
 
-ENTRYPOINT ["/bin/bash", "entry_point.sh"]
+CMD ["/bin/bash", "entry_point.sh"]
