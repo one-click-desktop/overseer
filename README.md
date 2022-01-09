@@ -41,7 +41,7 @@ To run app in docker:
 1. Run `build.sh` to create container.
 2. Run `docker run one-click-desktop/overseer`. You may want to add some or all of parameters specified below.
 
-### Important parameters:
+### Important parameters
 
 - Set port forwarding (docker ports depend on used configuration).
 
