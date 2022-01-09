@@ -30,6 +30,10 @@ Configuration is loaded from file in `Overseer/config`. Depending on launch sett
 - `DomainShutdownTimeout`: Timeout in minutes for machine shutdown after client disconnected (or lost connection). Default is `15` minutes.
 - `DomainShutdownCounterInterval`: Counter interval (in seconds) for domain shutdown checking. Should be divider of `DomainShutdownTimeout`. Default is `30` seconds.
 
+## Deployment
+
+System supports multiple instances of Overseer running in one system. If using load balancing proxy as entrypoint it is strongly adviced to use same Overseer during single user session (if possible). Switching Overseers during single session can have unspecified results.
+
 ## Run inside container
 
 You can use prepared Dockerfile to create container and run application in docker.
