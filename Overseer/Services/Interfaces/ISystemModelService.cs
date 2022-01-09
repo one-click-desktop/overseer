@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using OneClickDesktop.BackendClasses.Model;
+using OneClickDesktop.BackendClasses.Model.Types;
 using OneClickDesktop.Overseer.Entities;
 using User = OneClickDesktop.BackendClasses.Model.User;
 
