@@ -23,16 +23,11 @@ namespace OneClickDesktop.Overseer.Helpers.Settings
         public int RabbitMQPort { get; set; } = 5672;
 
         /// <summary>
-        /// Timeout in minutes for machine shoutdown after lossing connection with client
-        /// </summary>
-        public int SessionWaitingTimeout { get; set; } = 15;
-
-        /// <summary>
         /// Model requests to virtualization servers interval (in seconds)
         /// </summary>
         public int ModelUpdateInterval { get; set; } = 60;
         /// <summary>
-        /// Domain shutdown timeout period (in minutes)
+        /// Timeout in minutes for machine shoutdown after lossing connection with client
         /// </summary>
         public int DomainShutdownTimeout { get; set; } = 15;
 
