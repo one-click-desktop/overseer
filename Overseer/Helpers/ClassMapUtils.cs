@@ -2,6 +2,7 @@
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.States;
+using OneClickDesktop.BackendClasses.Model.Types;
 
 namespace OneClickDesktop.Overseer.Helpers
 {

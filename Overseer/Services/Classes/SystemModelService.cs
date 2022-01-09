@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.Resources;
 using OneClickDesktop.BackendClasses.Model.States;
+using OneClickDesktop.BackendClasses.Model.Types;
 using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Services.Interfaces;
