@@ -6,6 +6,14 @@ Overseer module for OneClickDesktop. Responsible for communication with users an
 
 - [.NET 5](https://dotnet.microsoft.com/en-us/download/dotnet/5.0)
 
+## Building
+
+Application is created for .NET5.0. All references are defined in `.csproj` files. With `dotnet5.0-sdk` installed building application should be as easy as:
+
+```
+$ dotnet build Overseer.sln
+```
+
 ## Configuration
 
 Configuration is loaded from file in `Overseer/config`. Depending on launch settings it's production or development one. Settings with no mentioned default are not used when not specified. Configuration files contain default value entries commented out, with default value assigned.
@@ -28,11 +36,16 @@ Configuration is loaded from file in `Overseer/config`. Depending on launch sett
 - `RabbitMQPort`: Port of RabbitMQ message broker for internal communication. Default value is `5672`.
 - `ModelUpdateInterval`: Amount of time in seconds between model requests to virtualization servers. Defaul;ts is `60` seconds.
 - `DomainShutdownTimeout`: Timeout in minutes for machine shutdown after client disconnected (or lost connection). Default is `15` minutes.
-- `DomainShutdownCounterInterval`: Counter interval (in seconds) for domain shutdown checking. Should be divider of `DomainShutdownTimeout`. Default is `30` seconds.
+- `DomainShutdownCounterInterval`: Counter interval (in seconds) for domain shutdown checking. Should be divider of `DomainShutdownTimeout`. Default is `30` seconds.one-click-desktop/overseer
 
 ## Deployment
 
-System supports multiple instances of Overseer running in one system. If using load balancing proxy as entrypoint it is strongly adviced to use same Overseer during single user session (if possible). Switching Overseers during single session can have unspecified results.
+System supports multiple instances of Overseer running in one system. If using load balancing proxy as entrypoint it is strongly advised to use same Overseer during single user session (if possible). Switching Overseers during single session can have unspecified results.
+
+## Building container
+
+To build container with application just run [build script](build.sh).
+It will create container under tag `one-click-desktop/overseer`.
 
 ## Run inside container
 
@@ -68,5 +81,6 @@ To run app in docker:
 Example command with all parameters using example certificate and config:
 
 ```DOCKER
-docker run --name overseer -d -p 80:5000 -p 443:5001 -v $PWD/Overseer/config:/overseer/config -v $PWD/overseer.pfx:/overseer/overseer.pfx one-click-desktop/overseer
+$ docker run --name overseer -d -p 80:5000 -p 443:5001 -v $PWD/Overseer/config:/overseer/config -v $PWD/overseer.pfx:/overseer/overseer.pfx one-click-desktop/overseer
 ```
+
