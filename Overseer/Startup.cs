@@ -36,7 +36,7 @@ namespace OneClickDesktop.Overseer
                 // serialize enums as strings in api responses (e.g. Role)
                 x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-
+            
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
             services.Configure<OneClickDesktopSettings>(Configuration.GetSection("OneClickDesktop"));
@@ -76,11 +76,6 @@ namespace OneClickDesktop.Overseer
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Overseer v1"));
             }
-
-            if (!env.IsDevelopment())
-            {
-                app.UseHttpsRedirection();
-            }
             
             app.UseCors(x => x
                              .AllowAnyOrigin()
@@ -104,10 +99,10 @@ namespace OneClickDesktop.Overseer
             // add hardcoded test users to db on startup
             var testUsers = new List<User>
             {
-                new User() { Id = Guid.NewGuid(), Username = "vagrant", Password = "vagrant", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = Guid.NewGuid(), Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = Guid.NewGuid(), Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = Guid.NewGuid(), Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
+                new User() { Id = Guid.Parse("f91649fb-de33-49ab-82ba-75d2171f494e"), Username = "vagrant", Password = "vagrant", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.Parse("73b55082-a92d-40b2-8376-527c63c2948a"), Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.Parse("437750eb-e40d-4d17-9510-1b9241ec37fe"), Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.Parse("e56497b3-0477-4cf4-8075-e539de14b730"), Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
             };
             context.Users.AddRange(testUsers);
             context.SaveChanges();

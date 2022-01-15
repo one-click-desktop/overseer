@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.Resources;
 using OneClickDesktop.BackendClasses.Model.States;
+using OneClickDesktop.BackendClasses.Model.Types;
 using OneClickDesktop.Overseer.Entities;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Services.Interfaces;
@@ -115,6 +115,27 @@ namespace OneClickDesktop.Overseer.Services.Classes
 
             return servers;
         }
+        
+        public IEnumerable<string> GetServerQueues()
+        {
+            IEnumerable<string> queues = null;
+            try
+            {
+                rwLock.AcquireReaderLock(Timeout.Infinite);
+
+                queues = model.Servers.Values.Select(s => s.Queue);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Error on getting domains for startup from model");
+            }
+            finally
+            {
+                rwLock.ReleaseReaderLock();
+            }
+
+            return queues;
+        }
 
         public IEnumerable<Machine> GetMachinesFromServer(Guid serverGuid)
         {
@@ -216,14 +237,16 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var domains = new List<DomainStartup>();
             try
             {
+                //[TODO][CONFIG] Aktualnie zawsze istnieje przynajmniej jedna maszyna danego typu.
+                // Chcemy móc konfigurowac liczbę oczekujących maszyn 
                 rwLock.AcquireReaderLock(Timeout.Infinite);
 
                 var servers = model.Servers.Values.Where(server => server.Managable).ToList();
 
                 // find all machine types
                 var machineTypes = servers
-                                   .SelectMany(server => server.TemplateResources.Keys)
-                                   .Select(key => new MachineType() { Type = key })
+                                   .SelectMany(server => server.TemplateResources)
+                                   .Select(pair => pair.Value.TemplateType)
                                    .Distinct();
                 // find machine types with machines
                 var machinesStarted = servers
@@ -254,7 +277,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                 foreach (var machineType in machinesToStart)
                 {
                     var serverTuple = servers
-                                 .Where(server => server.TemplateResources.ContainsKey(machineType.Type))
+                                 .Where(server => server.TemplateResources.ContainsKey(machineType.TechnicalName))
                                  .Select(server => (server, CanCreateMachines(server, machineType, serverResources)))
                                  .OrderByDescending(tuple => tuple.Item2)
                                  .FirstOrDefault();
@@ -281,7 +304,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private int CanCreateMachines(VirtualizationServer server, MachineType type,
                                       Dictionary<Guid, ServerResources> serverResourcesMap)
         {
-            var template = server.TemplateResources[type.Type];
+            var template = server.TemplateResources[type.TechnicalName];
             var resources = serverResourcesMap[server.ServerGuid];
 
             var count = Math.Min(resources.CpuCores / template.CpuCores,
@@ -294,7 +317,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                                              VirtualizationServer server, MachineType type)
         {
             // update map: decrease resources needed to create this machine
-            var template = server.TemplateResources[type.Type];
+            var template = server.TemplateResources[type.TechnicalName];
             var resources = serverResourcesMap[server.ServerGuid];
             serverResourcesMap[server.ServerGuid] = new ServerResources(
                 resources.Memory - template.Memory,
@@ -311,7 +334,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
                                          .Select(machine => (int?)int.Parse(
                                                      machine.Name[(machine.Name.LastIndexOf('-') + 1)..]))
                                          .Max() ?? -1;
-            return $"{server.ServerGuid.ToString()}-{machineType.Type}-{lastDomainNumber + 1}";
+            return $"{server.ServerGuid.ToString()}-{machineType}-{lastDomainNumber + 1}";
         }
 
         public Machine GetMachine(Guid serverGuid, string machineName)

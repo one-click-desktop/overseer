@@ -10,25 +10,24 @@ namespace OneClickDesktop.Overseer.Helpers.Settings
         /// <summary>
         /// Overseer system-wide unique id
         /// </summary>
-        public string OverseerId { get; set; }
+        public string OverseerId { get; set; } = "overseer-test";
+
         /// <summary>
         /// Internal RabbitMQ broker access address
         /// </summary>
-        public string RabbitMQHostname { get; set; }
+        public string RabbitMQHostname { get; set; } = "localhost";
+
         /// <summary>
         /// Internal RabbitMQ broker access port
         /// </summary>
-        public int RabbitMQPort { get; set; }
-        /// <summary>
-        /// Timeout in minutes for machine shoutdown after lossing connection with client
-        /// </summary>
-        public int SessionWaitingTimeout { get; set; }
+        public int RabbitMQPort { get; set; } = 5672;
+
         /// <summary>
         /// Model requests to virtualization servers interval (in seconds)
         /// </summary>
-        public int ModelUpdateInterval { get; set; }
+        public int ModelUpdateInterval { get; set; } = 60;
         /// <summary>
-        /// Domain shutdown timeout period (in minutes)
+        /// Timeout in minutes for machine shoutdown after lossing connection with client
         /// </summary>
         public int DomainShutdownTimeout { get; set; } = 15;
 

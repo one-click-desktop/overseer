@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using OneClickDesktop.BackendClasses.Model;
+using OneClickDesktop.BackendClasses.Model.Types;
 using OneClickDesktop.Overseer.Entities;
 using User = OneClickDesktop.BackendClasses.Model.User;
 
@@ -15,6 +16,8 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         public void RemoveDeadServer(string directQueueName);
 
         public IEnumerable<VirtualizationServer> GetServers();
+
+        public IEnumerable<string> GetServerQueues();
 
         public IEnumerable<Machine> GetMachinesFromServer(Guid serverGuid);
 
