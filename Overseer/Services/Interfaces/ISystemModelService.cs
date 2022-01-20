@@ -35,5 +35,7 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         public Machine GetMachine(Guid serverGuid, string machineName);
 
         public void CancelSession(Session session);
+
+        public string GetSessionDump();
     }
 }

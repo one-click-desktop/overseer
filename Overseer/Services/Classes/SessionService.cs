@@ -3,7 +3,6 @@ using System.Net;
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.BackendClasses.Communication.RabbitDTOs;
 using OneClickDesktop.BackendClasses.Model;
-using OneClickDesktop.BackendClasses.Model.States;
 using OneClickDesktop.Overseer.Helpers;
 using OneClickDesktop.Overseer.Helpers.Exceptions;
 using OneClickDesktop.Overseer.Messages;
