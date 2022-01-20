@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using OneClickDesktop.BackendClasses.Model;
@@ -123,7 +124,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 rwLock.AcquireReaderLock(Timeout.Infinite);
 
-                queues = model.Servers.Values.Select(s => s.Queue);
+                queues = new List<string>(model.Servers.Values.Select(s => s.Queue));
             }
             catch (Exception e)
             {
@@ -211,12 +212,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
             try
             {
                 rwLock.AcquireReaderLock(Timeout.Infinite);
-                var machineType = ClassMapUtils.MapSessionTypeToMachineType(session.SessionType);
                 // find free machine of type
                 machineForSession = model.Servers.Values
                                          .SelectMany(
                                              server => server.RunningMachines.Values.Where(
-                                                 machine => machine.MachineType.Equals(machineType)
+                                                 machine => machine.MachineType.Equals(session.SessionType)
                                                             && machine.State == MachineState.Free)
                                          ).FirstOrDefault();
             }
@@ -378,6 +378,11 @@ namespace OneClickDesktop.Overseer.Services.Classes
             {
                 rwLock.ReleaseWriterLock();
             }
+        }
+
+        public string GetSessionDump()
+        {
+            return JsonSerializer.Serialize(model);
         }
 
         public Session GetSession(Guid sessionGuid)

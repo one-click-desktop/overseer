@@ -55,15 +55,5 @@ namespace OneClickDesktop.Overseer.Helpers
         {
             return new SessionType() { Type = machineType.Code };
         }
-        
-        /// <summary>
-        /// UWAGA! To jest niebezpieczne!! Tworzymy połowiczny obiekt bez HR stringa
-        /// </summary>
-        /// <param name="sessionType"></param>
-        /// <returns></returns>
-        public static MachineType MapSessionTypeToMachineType(SessionType sessionType)
-        {
-            return new MachineType() { TechnicalName = sessionType.Type };
-        }
     }
 }
