@@ -2,6 +2,7 @@
 using OneClickDesktop.Api.Models;
 using OneClickDesktop.BackendClasses.Model;
 using OneClickDesktop.BackendClasses.Model.States;
+using OneClickDesktop.BackendClasses.Model.Types;
 
 namespace OneClickDesktop.Overseer.Helpers
 {
@@ -45,19 +46,14 @@ namespace OneClickDesktop.Overseer.Helpers
             return new MachineTypeDTO()
             {
                 // TODO: resolve name based on type
-                Name = type.Type,
-                Code = type.Type
+                Name = type.HumanReadableName,
+                Code = type.TechnicalName
             };
         }
 
         public static SessionType MapMachineTypeDTOToSessionType(MachineTypeDTO machineType)
         {
             return new SessionType() { Type = machineType.Code };
-        }
-
-        public static MachineType MapSessionTypeToMachineType(SessionType sessionType)
-        {
-            return new MachineType() { Type = sessionType.Type };
         }
     }
 }

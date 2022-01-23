@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using OneClickDesktop.Api.Models;
 
 namespace OneClickDesktop.Overseer.Services.Interfaces
@@ -19,7 +20,8 @@ namespace OneClickDesktop.Overseer.Services.Interfaces
         /// Metoda ma zwracać informacje o dostępności wsyztskich typów maszyn.
         /// Docelowo dane maja wyladowac w aplikacji klienckiej.
         /// </summary>
+        /// <param name="userGuid">Identifier of user requesting</param>
         /// <returns>Kolekcja obiektów, które opisują licznośc i typ maszyny.</returns>
-        IEnumerable<MachineDTO> GetMachinesInfo();
+        IEnumerable<MachineDTO> GetMachinesInfo(Guid userGuid);
     }
 }
