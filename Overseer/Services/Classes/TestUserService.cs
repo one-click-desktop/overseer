@@ -13,17 +13,14 @@ using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
-    public class UserService : IUserService
+    public class TestUserService : IUserService
     {
-        private TestDataContext context;
-        private IJwtUtils jwtUtils;
-        private readonly JwtSettings jwtSettings;
+        private readonly TestDataContext context;
+        private readonly IJwtUtils jwtUtils;
 
-        public UserService(TestDataContext context,
-            IJwtUtils jwtUtils,
-            IOptions<JwtSettings> jwtSettings)
+        public TestUserService(TestDataContext context,
+                               IJwtUtils jwtUtils)
         {
-            this.jwtSettings = jwtSettings.Value;
             this.jwtUtils = jwtUtils;
             this.context = context;
         }

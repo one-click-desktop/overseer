@@ -19,6 +19,7 @@
     <PackageReference Include="OneClickDesktop.BackendClasses" Version="1.0.17" />
     <PackageReference Include="OneClickDesktop.RabbitModule.Overseer" Version="1.0.9" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>

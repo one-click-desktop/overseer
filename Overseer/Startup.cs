@@ -40,6 +40,7 @@ namespace OneClickDesktop.Overseer
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
             services.Configure<OneClickDesktopSettings>(Configuration.GetSection("OneClickDesktop"));
+            services.Configure<LdapSettings>(Configuration.GetSection("LDAP"));
             
             //singleton - model (zapytania publiczne muszą byc thread-safe!!!)
             services.AddSingleton<ISystemModelService, SystemModelService>();
@@ -48,7 +49,7 @@ namespace OneClickDesktop.Overseer
             services.AddSingleton<ISessionProcessService, SessionProcessService>();
             services.AddSingleton<IMachineService, MachineService>();
             services.AddScoped<IJwtUtils, JwtUtils>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserService, LdapUserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<ISessionService, SessionService>();
             
@@ -64,7 +65,7 @@ namespace OneClickDesktop.Overseer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TestDataContext context)
         {
-            createTestUsers(context);
+            // createTestUsers(context);
 
             //Wymuszenie uruchomienia modułu do komunikajci z rabbitem
             app.ApplicationServices.GetService<IVirtualizationServerConnectionService>();
