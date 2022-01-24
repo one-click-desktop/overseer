@@ -49,12 +49,19 @@ namespace OneClickDesktop.Overseer
             services.AddSingleton<ISessionProcessService, SessionProcessService>();
             services.AddSingleton<IMachineService, MachineService>();
             services.AddScoped<IJwtUtils, JwtUtils>();
-            services.AddScoped<IUserService, LdapUserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<ISessionService, SessionService>();
-            
-            //var test = new VirtualizationServerConnectionService(new SystemModelService());
 
+            var mockUsers = (bool) (Configuration.GetValue(typeof(bool), "mockUsers") ?? false);
+            if (mockUsers)
+            {
+                services.AddScoped<IUserService, TestUserService>();
+            }
+            else
+            {
+                services.AddScoped<IUserService, LdapUserService>();
+            }
+            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -65,7 +72,7 @@ namespace OneClickDesktop.Overseer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TestDataContext context)
         {
-            // createTestUsers(context);
+            CreateTestUsers(context);
 
             //Wymuszenie uruchomienia modułu do komunikajci z rabbitem
             app.ApplicationServices.GetService<IVirtualizationServerConnectionService>();
@@ -95,7 +102,7 @@ namespace OneClickDesktop.Overseer
             });
         }
 
-        private void createTestUsers(TestDataContext context)
+        private void CreateTestUsers(TestDataContext context)
         {
             // add hardcoded test users to db on startup
             var testUsers = new List<User>

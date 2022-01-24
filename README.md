@@ -28,6 +28,7 @@ Configuration is loaded from file in `Overseer/config`. Depending on launch sett
 - `Path`: Path to TSL/SSL certificate in `.pfx` format.
 - `Password`: Certificate password, if needed.
   > If address with `https` protocol is specified in `urls` then application won't start without certificate.
+- `mockUsers`: Use locally mocked users instead of LDAP. For development purposes.
 
 ### Application
 

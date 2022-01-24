@@ -23,7 +23,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private readonly NetworkCredential readOnlyCredential;
         private readonly string[] ldapAttributes;
 
-        private LdapConnection readOnlyConnection;
+        private static LdapConnection readOnlyConnection;
 
         public LdapUserService(IJwtUtils jwtUtils,
                                ILogger<SystemModelService> logger,
