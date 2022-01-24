@@ -39,6 +39,9 @@ Configuration is loaded from file in `Overseer/config`. Depending on launch sett
 - `DomainShutdownCounterInterval`: Counter interval (in seconds) for domain shutdown checking. Should be divider of `DomainShutdownTimeout`. Default is `30` seconds.one-click-desktop/overseer
 
 ### LDAP
+
+Users should inherit from `posixAccount` class. In that case settings related to attributes can be left at default value.
+
 - `LdapHostname`: Hostname of LDAP containing system users. Default value is `localhost`.
 - `LdapPort`: Port of LDAP containing system users. Default value is `389`.
 - `UserSearchBase`: Base location to search for users (in DN format). Default value is `ou=users,dc=example,dc=org`.
