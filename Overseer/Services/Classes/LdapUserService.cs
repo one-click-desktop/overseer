@@ -13,7 +13,7 @@ using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
-    public class LdapUserService : IUserService, IDisposable
+    public class LdapUserService : IUserService
     {
         private readonly IJwtUtils jwtUtils;
         private readonly IOptions<LdapSettings> conf;
@@ -22,8 +22,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
         private readonly LdapDirectoryIdentifier ldapServer;
         private readonly NetworkCredential readOnlyCredential;
         private readonly string[] ldapAttributes;
-
-        private static LdapConnection readOnlyConnection;
 
         public LdapUserService(IJwtUtils jwtUtils,
                                ILogger<SystemModelService> logger,
@@ -76,7 +74,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         {
             try
             {
-                var connection = GetReadOnlyConnection();
+                using var connection = GetReadOnlyConnection();
                 var filter = $"({conf.Value.UserGuidAttribute}={guid})";
                 var user = GetUserFromLdap(conf.Value.UserSearchBase, filter, connection);
                 return user ?? throw new KeyNotFoundException("User not found");
@@ -93,17 +91,12 @@ namespace OneClickDesktop.Overseer.Services.Classes
         /// </summary>
         private LdapConnection GetReadOnlyConnection()
         {
-            if (readOnlyConnection != null)
-            {
-                return readOnlyConnection;
-            }
-
-            readOnlyConnection = new LdapConnection(ldapServer, readOnlyCredential, AuthType.Basic);
-            readOnlyConnection.SessionOptions.AutoReconnect = true;
-            readOnlyConnection.SessionOptions.TcpKeepAlive = true;
+            var readOnlyConnection = new LdapConnection(ldapServer, readOnlyCredential, AuthType.Basic);
+            //readOnlyConnection.SessionOptions.AutoReconnect = true;
+            //readOnlyConnection.SessionOptions.TcpKeepAlive = true;
             readOnlyConnection.SessionOptions.SecureSocketLayer = conf.Value.UseSsl;
             readOnlyConnection.SessionOptions.ProtocolVersion = 3;
-            readOnlyConnection.AutoBind = true;
+            //readOnlyConnection.AutoBind = true;
             
             readOnlyConnection.Bind();
             return readOnlyConnection;
@@ -197,12 +190,6 @@ namespace OneClickDesktop.Overseer.Services.Classes
             }
 
             return null;
-        }
-
-        public void Dispose()
-        {
-            readOnlyConnection?.Dispose();
-            readOnlyConnection = null;
         }
     }
 }
