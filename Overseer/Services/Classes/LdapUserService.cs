@@ -202,6 +202,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
         public void Dispose()
         {
             readOnlyConnection?.Dispose();
+            readOnlyConnection = null;
         }
     }
 }
