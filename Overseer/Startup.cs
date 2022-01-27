@@ -29,7 +29,7 @@ namespace OneClickDesktop.Overseer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>();
+            services.AddDbContext<TestDataContext>();
             services.AddCors();
             services.AddControllers().AddJsonOptions(x =>
             {
@@ -40,6 +40,7 @@ namespace OneClickDesktop.Overseer
             // configure strongly typed settings object
             services.Configure<JwtSettings>(Configuration.GetSection("JwtSettings"));
             services.Configure<OneClickDesktopSettings>(Configuration.GetSection("OneClickDesktop"));
+            services.Configure<LdapSettings>(Configuration.GetSection("LDAP"));
             
             //singleton - model (zapytania publiczne muszą byc thread-safe!!!)
             services.AddSingleton<ISystemModelService, SystemModelService>();
@@ -48,12 +49,19 @@ namespace OneClickDesktop.Overseer
             services.AddSingleton<ISessionProcessService, SessionProcessService>();
             services.AddSingleton<IMachineService, MachineService>();
             services.AddScoped<IJwtUtils, JwtUtils>();
-            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<ISessionService, SessionService>();
-            
-            //var test = new VirtualizationServerConnectionService(new SystemModelService());
 
+            var mockUsers = (bool) (Configuration.GetValue(typeof(bool), "mockUsers") ?? false);
+            if (mockUsers)
+            {
+                services.AddScoped<IUserService, TestUserService>();
+            }
+            else
+            {
+                services.AddScoped<IUserService, LdapUserService>();
+            }
+            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -62,9 +70,9 @@ namespace OneClickDesktop.Overseer
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TestDataContext context)
         {
-            createTestUsers(context);
+            CreateTestUsers(context);
 
             //Wymuszenie uruchomienia modułu do komunikajci z rabbitem
             app.ApplicationServices.GetService<IVirtualizationServerConnectionService>();
@@ -94,15 +102,15 @@ namespace OneClickDesktop.Overseer
             });
         }
 
-        private void createTestUsers(DataContext context)
+        private void CreateTestUsers(TestDataContext context)
         {
             // add hardcoded test users to db on startup
             var testUsers = new List<User>
             {
-                new User() { Id = Guid.Parse("f91649fb-de33-49ab-82ba-75d2171f494e"), Username = "vagrant", Password = "vagrant", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = Guid.Parse("73b55082-a92d-40b2-8376-527c63c2948a"), Username = "user1", Password = "user1_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = Guid.Parse("437750eb-e40d-4d17-9510-1b9241ec37fe"), Username = "user2", Password = "user2_pass", Role = TokenDTO.RoleEnum.User },
-                new User() { Id = Guid.Parse("e56497b3-0477-4cf4-8075-e539de14b730"), Username = "admin1", Password = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
+                new User() { Id = Guid.Parse("f91649fb-de33-49ab-82ba-75d2171f494e"), Username = "vagrant", PasswordHash = "vagrant", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.Parse("73b55082-a92d-40b2-8376-527c63c2948a"), Username = "user1", PasswordHash = "user1_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.Parse("437750eb-e40d-4d17-9510-1b9241ec37fe"), Username = "user2", PasswordHash = "user2_pass", Role = TokenDTO.RoleEnum.User },
+                new User() { Id = Guid.Parse("e56497b3-0477-4cf4-8075-e539de14b730"), Username = "admin1", PasswordHash = "admin1_pass", Role = TokenDTO.RoleEnum.Admin }
             };
             context.Users.AddRange(testUsers);
             context.SaveChanges();

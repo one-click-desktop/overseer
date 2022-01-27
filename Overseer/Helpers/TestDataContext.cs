@@ -4,13 +4,13 @@ using OneClickDesktop.Overseer.Entities;
 
 namespace OneClickDesktop.Overseer.Helpers
 {
-    public class DataContext : DbContext
+    public class TestDataContext : DbContext
     {
         public DbSet<User> Users { get; set; }
 
         private readonly IConfiguration Configuration;
 
-        public DataContext(IConfiguration configuration)
+        public TestDataContext(IConfiguration configuration)
         {
             Configuration = configuration;
         }

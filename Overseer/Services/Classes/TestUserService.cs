@@ -13,17 +13,14 @@ using OneClickDesktop.Overseer.Services.Interfaces;
 
 namespace OneClickDesktop.Overseer.Services.Classes
 {
-    public class UserService : IUserService
+    public class TestUserService : IUserService
     {
-        private DataContext context;
-        private IJwtUtils jwtUtils;
-        private readonly JwtSettings jwtSettings;
+        private readonly TestDataContext context;
+        private readonly IJwtUtils jwtUtils;
 
-        public UserService(DataContext context,
-            IJwtUtils jwtUtils,
-            IOptions<JwtSettings> jwtSettings)
+        public TestUserService(TestDataContext context,
+                               IJwtUtils jwtUtils)
         {
-            this.jwtSettings = jwtSettings.Value;
             this.jwtUtils = jwtUtils;
             this.context = context;
         }
@@ -33,7 +30,7 @@ namespace OneClickDesktop.Overseer.Services.Classes
             var user = context.Users.SingleOrDefault(x => x.Username == loginData.Login);
 
             // validate
-            if (user == null || loginData.Password != user.Password)
+            if (user == null || loginData.Password != user.PasswordHash)
                 throw new ErrorHttpException("Bad credentials", HttpStatusCode.Unauthorized);
 
             // authentication successful so generate jwt token

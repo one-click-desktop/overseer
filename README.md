@@ -28,6 +28,7 @@ Configuration is loaded from file in `Overseer/config`. Depending on launch sett
 - `Path`: Path to TSL/SSL certificate in `.pfx` format.
 - `Password`: Certificate password, if needed.
   > If address with `https` protocol is specified in `urls` then application won't start without certificate.
+- `mockUsers`: Use locally mocked users instead of LDAP. For development purposes.
 
 ### Application
 
@@ -37,6 +38,23 @@ Configuration is loaded from file in `Overseer/config`. Depending on launch sett
 - `ModelUpdateInterval`: Amount of time in seconds between model requests to virtualization servers. Defaul;ts is `60` seconds.
 - `DomainShutdownTimeout`: Timeout in minutes for machine shutdown after client disconnected (or lost connection). Default is `15` minutes.
 - `DomainShutdownCounterInterval`: Counter interval (in seconds) for domain shutdown checking. Should be divider of `DomainShutdownTimeout`. Default is `30` seconds.one-click-desktop/overseer
+
+### LDAP
+
+Users should inherit from `posixAccount` class. In that case settings related to attributes can be left at default value.
+
+- `LdapHostname`: Hostname of LDAP containing system users. Default value is `localhost`.
+- `LdapPort`: Port of LDAP containing system users. Default value is `389`.
+- `UserSearchBase`: Base location to search for users (in DN format). Default value is `ou=users,dc=example,dc=org`.
+- `Domain`: LDAP domain name (in DN format). Default value is `dc=example,dc=org`.
+- `UseSsl`: Specifies if TSL/SSL should be used fir connection to LDAP. Default value is `false`.
+- `UserGuidAttribute`: Name of attribute holding user GUID. Default value is `guid`.
+- `UserGroupAttribute`: Name of attribute holding user group ID. Default value is `gidNumber`.
+- `UserNameAttribute`: Name of attribute holding userName. Default value is `uid`.
+- `UserGroupNumber`: ID of OneClickDesktop users group. Default value is `502`.
+- `AdminGroupNumber`: ID of OneClickDesktop admins group. Default value is `501`.
+- `ReadOnlyUserName`: Name of readOnly user used for lookup (in DN format). Default value is `readonly`.
+- `ReadOnlyUserPassword`: Password of readOnly user used for lookup. Default value is `readonly`.
 
 ## Deployment
 
